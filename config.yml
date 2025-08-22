@@ -1,4 +1,11 @@
 task: "surface_code:rotated_memory_z"
+# Valid tasks include:
+# - repetition_code:memory
+# - surface_code:rotated_memory_x
+# - surface_code:rotated_memory_z
+# - surface_code:unrotated_memory_x
+# - surface_code:unrotated_memory_z
+# - color_code:memory_xyz
 parameters:
   distance: 5
   rounds: 3

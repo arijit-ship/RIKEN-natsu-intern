@@ -3,16 +3,7 @@ import sys
 import json
 import yaml
 from src.simulator import Simulator
-"""
-Valid tasks are:
-"repetition_code:memory"
-"surface_code:rotated_memory_x"
-"surface_code:rotated_memory_z"
-"surface_code:unrotated_memory_x"
-"surface_code:unrotated_memory_z"
-"color_code:memory_xyz"
 
-"""
 
 def load_config(config_path):
     # Check if the config file exists
@@ -24,6 +15,7 @@ def load_config(config_path):
         config = yaml.safe_load(file)
 
     return config
+
 
 if __name__ == "__main__":
     # Check if a config file argument is provided
@@ -39,11 +31,9 @@ if __name__ == "__main__":
     task: str = config["task"]
     distance: int = config["parameters"]["distance"]
     rounds: int = config["parameters"]["rounds"]
-    error_dtls: dict = config["parameters"]["errors"]
-    after_clifford_depolarization: float = error_dtls["after_clifford_depolarization"]
-    before_round_data_depolarization: float = error_dtls["before_round_data_depolarization"]
-    before_measure_flip_probability: float = error_dtls["before_measure_flip_probability"]  
-    after_reset_flip_probability: float = error_dtls["after_reset_flip_probability"]    
+
+    error_prob_dtls: dict = config["parameters"]["errors"]
+
     export_dtls: dict = config["exports"]
     figure_exporting: bool = export_dtls["figure"]["exporting"]
     figure_file: str = export_dtls["figure"]["file"]
@@ -52,15 +42,7 @@ if __name__ == "__main__":
     output_file: str = export_dtls["output"]["file"]
 
     # Initialize the simulator
-    sim = Simulator(
-        task=task,
-        distance=distance,
-        rounds=rounds,
-        after_clifford_depolarization=after_clifford_depolarization,
-        before_round_data_depolarization=before_round_data_depolarization,
-        before_measure_flip_probability=before_measure_flip_probability,
-        after_reset_flip_probability=after_reset_flip_probability
-    )
+    sim = Simulator(task=task, distance=distance, rounds=rounds, error_probs=error_prob_dtls)
 
     if figure_exporting:
         sim.draw(figure_file, transparent=False)
@@ -68,17 +50,8 @@ if __name__ == "__main__":
     if circuit_exporting:
         sim.export_circ_txt(circuit_file)
 
-    sim.save_output(output_file)
+    output: dict = {"config": config}
 
-# circ_fig = "output/circuit_fig.svg"
-# circ_txt = "output/circuit_text.txt"
-# # Example usage:
-# sim = Simulator(
-#     distance=3,
-#     rounds=2,
-#     err_prob=0.01,
-#     task="surface_code:rotated_memory_z"
-# )
-
-# sim.draw(circ_fig, transparent=False)
-# sim.export_circ_txt(circ_txt)
+    # Save Output
+    with open(output_file, "w") as f:
+        json.dump(output, f, indent=4)

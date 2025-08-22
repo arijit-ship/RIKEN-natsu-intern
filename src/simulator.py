@@ -3,26 +3,30 @@ import re
 
 
 class Simulator:
-    def __init__(self, distance: int, rounds: int, err_prob: float, task: str):
+    def __init__(self, distance: int, rounds: int, error_probs: dict, task: str):
         """
         Initialize the simulator with parameters.
         """
         self.distance = distance
         self.rounds = rounds
-        self.error_prob = err_prob
+        self.error_probs = error_probs
         self.task = task
         self.ec_circuit = None
 
+        after_clifford_depolarization: float = error_probs["after_clifford_depolarization"]
+        before_round_data_depolarization: float = error_probs["before_round_data_depolarization"]
+        before_measure_flip_probability: float = error_probs["before_measure_flip_probability"]
+        after_reset_flip_probability: float = error_probs["after_reset_flip_probability"]
         # Only generate circuit if distance is odd
         if self.is_distance_odd():
             self.ec_circuit = stim.Circuit.generated(
                 self.task,  # must be positional
                 distance=self.distance,
                 rounds=self.rounds,
-                after_clifford_depolarization=0,
-                before_round_data_depolarization=0,
-                before_measure_flip_probability=0,
-                after_reset_flip_probability=0,
+                after_clifford_depolarization=after_clifford_depolarization,
+                before_round_data_depolarization=before_round_data_depolarization,
+                before_measure_flip_probability=before_measure_flip_probability,
+                after_reset_flip_probability=after_reset_flip_probability,
             )
         else:
             raise ValueError(f"Distance must be odd, got {self.distance}")
@@ -56,18 +60,14 @@ class Simulator:
             if viewbox_match:
                 width, height = map(float, viewbox_match.group(1).split()[2:])
                 rect_tag = f'<rect width="{width}" height="{height}" fill="white"/>'
-                svg_str = (
-                    svg_str[:svg_open_tag_end] + rect_tag + svg_str[svg_open_tag_end:]
-                )
+                svg_str = svg_str[:svg_open_tag_end] + rect_tag + svg_str[svg_open_tag_end:]
 
         if filename:
             with open(filename, "w") as f:
                 f.write(svg_str)
             return filename
         else:
-            return (
-                svg_str if not transparent else self.ec_circuit.diagram("timeline-svg")
-            )
+            return svg_str if not transparent else self.ec_circuit.diagram("timeline-svg")
 
     def export_circ_txt(self, filename: str | None = None):
         """
