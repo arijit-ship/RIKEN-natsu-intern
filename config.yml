@@ -1,0 +1,18 @@
+task: "surface_code:rotated_memory_z"
+parameters:
+  distance: 5
+  rounds: 3
+  errors:
+    after_clifford_depolarization: 0.0
+    before_round_data_depolarization: 0.0
+    before_measure_flip_probability: 0.0
+    after_reset_flip_probability: 0.0
+exports:
+  figure:
+    exporting: True
+    file: "output/test_fig.svg"
+  circuit:
+    exporting: True
+    file: "output/test_circ.txt"
+  output:
+    file: "output/output.json"
