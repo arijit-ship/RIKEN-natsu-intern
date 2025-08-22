@@ -1,8 +1,9 @@
-import stim
 import re
 
+import stim
 
-class Simulator:
+
+class NoiseSimulator:
     def __init__(self, distance: int, rounds: int, error_probs: dict, task: str):
         """
         Initialize the simulator with parameters.
@@ -41,7 +42,7 @@ class Simulator:
             raise RuntimeError("Circuit not constructed (distance was even).")
         return self.ec_circuit
 
-    def perform_measurement(self, shots: int):
+    def perform_measurement(self, shots: int, seed: int | None = None):
         """
         Perform measurements for the circuit.
         Prints measurement results round by round.
@@ -50,7 +51,11 @@ class Simulator:
             raise RuntimeError("No circuit to measure (distance was even).")
 
         # Compile the circuit sampler
-        sampler = self.ec_circuit.compile_detector_sampler()
+        if seed != None:
+            sampler = self.ec_circuit.compile_detector_sampler()
+        else:
+            sampler = self.ec_circuit.compile_detector_sampler(seed=seed)
+            
         sampling_result = sampler.sample(shots=shots)
         return sampling_result
         # print(sampler.sample(shots))

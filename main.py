@@ -1,15 +1,22 @@
+import argparse
+import hashlib
+import json
 import os
 import sys
-import json
+import time
+
 import yaml
-from src.simulator import Simulator
+
+from src.simulator import NoiseSimulator
 
 
-def load_config(config_path):
-    # Check if the config file exists
+def load_config(config_path: str):
+    """
+    Load a YAML configuration file.
+    Raises FileNotFoundError if the file does not exist.
+    """
     if not os.path.exists(config_path):
-        print(f"Error: Config file '{config_path}' not found.")
-        return None
+        raise FileNotFoundError(f"Config file '{config_path}' not found.")
 
     with open(config_path, "r") as file:
         config = yaml.safe_load(file)
@@ -18,9 +25,30 @@ def load_config(config_path):
 
 
 if __name__ == "__main__":
-    # Check if a config file argument is provided
+    # -----------------------------
+    # Argument parsing
+    # -----------------------------
+    parser = argparse.ArgumentParser(
+        description="Run NoiseSimulator using a YAML configuration file.", usage="python3 %(prog)s <config.yml>"
+    )
+    parser.add_argument("config_file", type=str, help="Path to the YAML configuration file.")
+
+    # Parse arguments, show clear message if missing
     if len(sys.argv) < 2:
-        print("Usage: python3 main.py <config_file>")
+        parser.print_usage()
+        print("Error: Missing config file argument.")
+        sys.exit(1)
+
+    args = parser.parse_args()
+    config_file = args.config_file
+
+    # -----------------------------
+    # Load the config
+    # -----------------------------
+    try:
+        config = load_config(config_file)
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
         sys.exit(1)
 
     # Get the config file path from command-line arguments
@@ -33,6 +61,8 @@ if __name__ == "__main__":
     rounds: int = config["parameters"]["rounds"]
 
     shots: int = config["parameters"]["sampling"]["shots"]
+    seed: int | None = config["parameters"]["sampling"]["seed"]
+
     m_printing: bool = config["parameters"]["sampling"]["console_log"]
 
     error_prob_dtls: dict = config["parameters"]["errors"]
@@ -47,7 +77,7 @@ if __name__ == "__main__":
     outfile_prettify: bool = export_dtls["output"]["prettify"]
 
     # Initialize the simulator
-    sim = Simulator(task=task, distance=distance, rounds=rounds, error_probs=error_prob_dtls)
+    sim = NoiseSimulator(task=task, distance=distance, rounds=rounds, error_probs=error_prob_dtls)
 
     if figure_exporting:
         sim.draw(figure_file, transparent=fig_bg_trans)
@@ -55,22 +85,40 @@ if __name__ == "__main__":
     if circuit_exporting:
         circ_str: str = sim.export_circ_txt(circuit_file)
 
-    sampling = sim.perform_measurement(shots=shots)
+    sampling = sim.perform_measurement(shots=shots, seed=seed)
 
     # For writing in a JSON
     sampling_serializable = [shot.tolist() for shot in sampling]
     if m_printing:
         print(sampling)
 
-    output: dict = {
-        "config": config,
-        "circuit_text": circ_str,
-        "measurements": sampling_serializable
-        }
+    output: dict = {"config": config, "circuit_text": circ_str, "measurements": sampling_serializable}
 
-    # Save Output
+    # Save output in a JSON
     with open(output_file, "w") as f:
         if outfile_prettify:
             json.dump(output, f, indent=4)
         else:
             json.dump(output, f)
+
+    # ----------------------------
+    # Save Output (hash(content+timestamp) file)
+    # ----------------------------
+    # Serialize deterministically (no pretty print, compact)
+    serialized = json.dumps(output, separators=(",", ":")).encode("utf-8")
+
+    # Timestamp string
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+
+    # Hash of (content + timestamp)
+    hash_input = serialized + timestamp.encode("utf-8")
+    content_hash = hashlib.sha256(hash_input).hexdigest()[:16]  # use 16 chars for readability
+
+    # Construct filename
+    base_dir = os.path.dirname(output_file)
+    unique_filename = f"{content_hash}.json"
+    unique_filepath = os.path.join(base_dir if base_dir else ".", unique_filename)
+
+    with open(unique_filepath, "w") as f:
+        f.write(serialized.decode("utf-8"))
+
