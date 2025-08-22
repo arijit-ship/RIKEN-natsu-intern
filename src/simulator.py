@@ -41,6 +41,35 @@ class Simulator:
             raise RuntimeError("Circuit not constructed (distance was even).")
         return self.ec_circuit
 
+    def perform_measurement(self, shots: int):
+        """
+        Perform measurements for the circuit.
+        Prints measurement results round by round.
+        """
+        if self.ec_circuit is None:
+            raise RuntimeError("No circuit to measure (distance was even).")
+
+        # Compile the circuit sampler
+        sampler = self.ec_circuit.compile_detector_sampler()
+        sampling_result = sampler.sample(shots=shots)
+        return sampling_result
+        # print(sampler.sample(shots))
+        # sampler = stim.CompiledSampler(self.ec_circuit)
+
+        # for i in range(shots):
+        #     sample = sampler.sample()  # single shot
+        #     print(f"Shot {i+1}: {sample}")
+
+        #     # If you want to split by round:
+        #     # For repetition code, number of qubits per round = distance
+        #     rounds = self.rounds
+        #     distance = self.distance
+        #     for r in range(rounds):
+        #         start = r * distance
+        #         end = start + distance
+        #         round_measurements = sample[start:end]
+        #         print(f"  Round {r+1}: {round_measurements}")
+
     def draw(self, filename: str | None = None, transparent: bool = True):
         """
         Draw the circuit timeline diagram.
@@ -83,6 +112,6 @@ class Simulator:
         if filename:
             with open(filename, "w") as f:
                 f.write(circ_str)
-            return filename
-        else:
             return circ_str
+        else:
+            raise ValueError("File name expected")
