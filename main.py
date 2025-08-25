@@ -121,4 +121,3 @@ if __name__ == "__main__":
 
     with open(unique_filepath, "w") as f:
         f.write(serialized.decode("utf-8"))
-

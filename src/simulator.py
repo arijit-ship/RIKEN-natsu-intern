@@ -44,36 +44,27 @@ class NoiseSimulator:
 
     def perform_measurement(self, shots: int, seed: int | None = None):
         """
-        Perform measurements for the circuit.
-        Prints measurement results round by round.
+        Performs measurements for the circuit and prints results round by round.
+
+        The `seed` parameter can be used to reproduce the same results,
+        provided the simulation is run on the same machine with the same
+        version of Stim.
         """
+
         if self.ec_circuit is None:
             raise RuntimeError("No circuit to measure (distance was even).")
 
         # Compile the circuit sampler
-        if seed != None:
+        if seed is None:
             sampler = self.ec_circuit.compile_detector_sampler()
         else:
             sampler = self.ec_circuit.compile_detector_sampler(seed=seed)
-            
+
         sampling_result = sampler.sample(shots=shots)
+
         return sampling_result
-        # print(sampler.sample(shots))
-        # sampler = stim.CompiledSampler(self.ec_circuit)
 
-        # for i in range(shots):
-        #     sample = sampler.sample()  # single shot
-        #     print(f"Shot {i+1}: {sample}")
-
-        #     # If you want to split by round:
-        #     # For repetition code, number of qubits per round = distance
-        #     rounds = self.rounds
-        #     distance = self.distance
-        #     for r in range(rounds):
-        #         start = r * distance
-        #         end = start + distance
-        #         round_measurements = sample[start:end]
-        #         print(f"  Round {r+1}: {round_measurements}")
+        #return {"result": sampling_result, "length": f"{len(sampling_result)}x{len(sampling_result[0])}"}
 
     def draw(self, filename: str | None = None, transparent: bool = True):
         """
