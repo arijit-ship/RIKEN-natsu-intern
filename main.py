@@ -91,6 +91,11 @@ if __name__ == "__main__":
     sampling_serializable = [shot.tolist() for shot in sampling]
     if m_printing:
         print(f"Readings: {sampling_serializable}, len: {len(sampling[0])}")
+    
+    # Mapping measurement output
+    sim.measurement_mapper(
+        sampling_serializable, True
+    )
 
     output: dict = {"config": config, "circuit_text": circ_str, "measurements": sampling_serializable}
 

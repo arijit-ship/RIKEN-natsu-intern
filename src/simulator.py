@@ -1,6 +1,9 @@
 import re
 
 import stim
+from src.helper import chunk_list
+from collections import defaultdict
+
 
 
 class NoiseSimulator:
@@ -118,14 +121,19 @@ class NoiseSimulator:
         """
         Map and label the output measurement.
         """
-
+        circuit = self.ec_circuit
         h_qubits = set()
         mr_qubits = set()
         m_qubits = set()
 
-        if len(measurements_out) != self.distance**2 + (2 * (self.distance**2 - 1)*0.5):
+        d = self.distance
+        r = self.rounds
+
+        if len(measurements_out[0]) != r * ((d**2 -1)) + d**2:
             raise RuntimeError("Inconsistent measurement output length.")
-            
+        else:
+            print ("Measurement output length matched")
+        print("-----------INSTRUCTION ORDER---------------")
         for inst in circuit:
             name = inst.name
 
@@ -141,13 +149,46 @@ class NoiseSimulator:
                 print("Measurement:", name, "on", [t.value for t in inst.targets_copy()])
                 m_qubits.update(t.value for t in inst.targets_copy())
 
+        print("-----------MAPPING---------------")
         # Intersection
-        common = h_qubits & mr_qubits
+        common = sorted(h_qubits & mr_qubits)
         # Difference
-        h_only = h_qubits - mr_qubits
-        mr_only = mr_qubits - h_qubits
-        print("------------------------")
+        h_only = sorted(h_qubits - mr_qubits)
+        mr_only = sorted(mr_qubits - h_qubits)
+        h_qubits=sorted(h_qubits)
+        m_qubits = sorted(m_qubits)
+        mr_qubits=sorted(mr_qubits)
+        print("M: ", m_qubits)
+        print("MR: ",mr_qubits)
         print("Qubits with H:", h_qubits)
-        print("Qubits with MR:", mr_qubits)
-        print("Intersection (H ∩ MR):", common)
-        print("MR only:", mr_only)
+        print("Qubits without H:", mr_only)
+
+        chunked = chunk_list(measurements_out[0], len(mr_qubits), repeat=r)  # [[0,1,2],[3,4,5],[6,7,8],[9]]
+
+        # Correct access
+        print(f"Original measuremet output: {measurements_out}")
+        print(f"Chunked: {chunked}")
+
+        intermediate_measurements = chunked[:self.rounds]  # Ancilla only
+        print(f"Intermediate ancilla measurements: {intermediate_measurements}")
+        final_measurements = chunked[-1]
+        print(f"Final measurements on data qubits: {final_measurements}")
+
+        mapped_result: list = []
+        for item in intermediate_measurements:
+            for i in zip(item, mr_qubits):
+                if i[1] in h_qubits:
+                    mapped_result.append({i, "ancx"})
+                else:
+                    mapped_result.append({i, "ancx"})
+                    
+        for i in zip(final_measurements, m_qubits):
+            mapped_result.append({i, "data"})
+
+        print(mapped_result)  
+
+
+
+
+
+
