@@ -90,7 +90,7 @@ if __name__ == "__main__":
     # For writing in a JSON
     sampling_serializable = [shot.tolist() for shot in sampling]
     if m_printing:
-        print(sampling)
+        print(f"Readings: {sampling_serializable}, len: {len(sampling[0])}")
 
     output: dict = {"config": config, "circuit_text": circ_str, "measurements": sampling_serializable}
 

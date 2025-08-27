@@ -11,18 +11,21 @@ parameters:
   # distance must be odd
   rounds: 2
   errors:
-    after_clifford_depolarization: 0.0
-    before_round_data_depolarization: 0.0
-    before_measure_flip_probability: 0.1
-    after_reset_flip_probability: 0.0
+    after_clifford_depolarization: 0
+    before_round_data_depolarization: 0
+    before_measure_flip_probability: 0
+    after_reset_flip_probability: 0
   sampling:
-    seed: Null  
+    seed: 5
     shots: 1
+    console_log: True
+  mapping:
     console_log: True
 exports:
   figure:
     exporting: True
     trans_bg: False
+    type:
     file: "output/test_fig.svg"
   circuit:
     exporting: True

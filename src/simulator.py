@@ -56,12 +56,14 @@ class NoiseSimulator:
 
         # Compile the circuit sampler
         if seed is None:
-            sampler = self.ec_circuit.compile_detector_sampler()
+            #sampler_d = self.ec_circuit.compile_detector_sampler()
+            sampler = self.ec_circuit.compile_sampler()
         else:
-            sampler = self.ec_circuit.compile_detector_sampler(seed=seed)
+            #sampler_d = self.ec_circuit.compile_detector_sampler(seed=seed)
+            sampler = self.ec_circuit.compile_sampler(seed=seed)
 
         sampling_result = sampler.sample(shots=shots)
-
+        
         return sampling_result
 
         #return {"result": sampling_result, "length": f"{len(sampling_result)}x{len(sampling_result[0])}"}
@@ -111,3 +113,41 @@ class NoiseSimulator:
             return circ_str
         else:
             raise ValueError("File name expected")
+    
+    def measurement_mapper(self, measurements_out: list, loggig: bool):
+        """
+        Map and label the output measurement.
+        """
+
+        h_qubits = set()
+        mr_qubits = set()
+        m_qubits = set()
+
+        if len(measurements_out) != self.distance**2 + (2 * (self.distance**2 - 1)*0.5):
+            raise RuntimeError("Inconsistent measurement output length.")
+            
+        for inst in circuit:
+            name = inst.name
+
+            if name == "H":
+                print("Hadamard on", [t.value for t in inst.targets_copy()])
+                h_qubits.update(t.value for t in inst.targets_copy())
+
+            elif name == "MR":
+                print("Measurement-Reset on", [t.value for t in inst.targets_copy()])
+                mr_qubits.update(t.value for t in inst.targets_copy())
+
+            elif name.startswith("M"):  # includes M, MX, MY, MR (if you want MR separate, check first!)
+                print("Measurement:", name, "on", [t.value for t in inst.targets_copy()])
+                m_qubits.update(t.value for t in inst.targets_copy())
+
+        # Intersection
+        common = h_qubits & mr_qubits
+        # Difference
+        h_only = h_qubits - mr_qubits
+        mr_only = mr_qubits - h_qubits
+        print("------------------------")
+        print("Qubits with H:", h_qubits)
+        print("Qubits with MR:", mr_qubits)
+        print("Intersection (H ∩ MR):", common)
+        print("MR only:", mr_only)
