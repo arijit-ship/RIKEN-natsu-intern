@@ -120,6 +120,7 @@ class StimErrorSimulator:
         """
         Map and label the output measurement.
         """
+        big_mapped_res: list = []
         circuit = self.ec_circuit
         h_qubits = set()
         mr_qubits = set()
@@ -127,77 +128,132 @@ class StimErrorSimulator:
 
         d = self.distance
         r = self.rounds
-
-        if len(measurements_out[0]) != r * ((d**2 - 1)) + d**2:
-            raise RuntimeError("Inconsistent measurement output length.")
+        expected_len: int = r * ((d**2 - 1)) + d**2
+        lengths = {len(shot) for shot in measurements_out}
+        if lengths != {expected_len}:
+            raise RuntimeError(f"❌ Inconsistent measurement lengths found: {lengths}, expected {expected_len}.")
         else:
             if logging:
-                print("\n\nMeasurement output length matched successfully! ✅")
+                print("\n✅ Measurement output length check passed.")
+        """
+        We will be reading STIM circuit description and get the following informations:
+        (1) Number of MRs (measurement-resets)
+        (2) Number of H gates applied
+        (3) If H and MR have common qubits
 
+        """
         if logging:
-            print("\n--- INSTRUCTION ORDER ---")
+            print("\n=== INSTRUCTION ORDER ===")
+        # for inst in circuit:
+        #     name = inst.name
+        #     targets = [t.value for t in inst.targets_copy()]
+
+        #     if name == "H":
+        #         if logging:
+        #             print(f"• Hadamard (H) applied → qubits {targets}")
+        #         h_qubits.update(targets)
+
+        #     elif name == "MR":
+        #         if logging:
+        #             print(f"• Measurement-Reset (MR) → qubits {targets}")
+        #         mr_qubits.update(targets)
+
+        #     elif name.startswith("M"):  # includes M, MX, MY, MR
+        #         if logging:
+        #             print(f"• Measurement ({name}) → qubits {targets}")
+        #         m_qubits.update(targets)
+
         for inst in circuit:
-            name = inst.name
+            # Case 1: Normal instruction
+            if hasattr(inst, "targets_copy"):
+                name = inst.name
+                targets = [t.value for t in inst.targets_copy()]
 
-            if name == "H":
-                if logging:
-                    targets = [t.value for t in inst.targets_copy()]
-                    print(f"Hadamard gate applied to qubits: {targets}")
-                h_qubits.update(t.value for t in inst.targets_copy())
+                if name == "H":
+                    h_qubits.update(targets)
+                    if logging:
+                        print(f"• Hadamard (H) applied → qubits {targets}")
 
-            elif name == "MR":
-                if logging:
-                    targets = [t.value for t in inst.targets_copy()]
-                    print(f"Measurement-Reset on qubits: {targets}")
-                mr_qubits.update(t.value for t in inst.targets_copy())
+                elif name == "MR":
+                    mr_qubits.update(targets)
+                    if logging:
+                        print(f"• Measurement-Reset (MR) → qubits {targets}")
 
-            elif name.startswith("M"):  # includes M, MX, MY, MR
-                if logging:
-                    targets = [t.value for t in inst.targets_copy()]
-                    print(f"Measurement '{name}' on qubits: {targets}")
-                m_qubits.update(t.value for t in inst.targets_copy())
+                elif name.startswith("M"):  # includes M, MX, MY, MR
+                    m_qubits.update(targets)
+                    if logging:
+                        print(f"• Measurement ({name}) → qubits {targets}")
+
+            # # Case 2: Repeat block
+            # elif hasattr(inst, "body"):
+            #     if logging:
+            #         print(f"\n⏩ Repeat block ×{inst.repeat_count}")
+
+            #     # Recurse inside block body
+            #     for sub_inst in inst.body:
+            #         name = sub_inst.name
+            #         targets = [t.value for t in sub_inst.targets_copy()]
+
+            #         if name == "H":
+            #             h_qubits.update(targets)
+            #             if logging:
+            #                 print(f"  • Hadamard (H) applied → qubits {targets}")
+
+            #         elif name == "MR":
+            #             mr_qubits.update(targets)
+            #             if logging:
+            #                 print(f"  • Measurement-Reset (MR) → qubits {targets}")
+
+            #         elif name.startswith("M"):
+            #             m_qubits.update(targets)
+            #             if logging:
+            #                 print(f"  • Measurement ({name}) → qubits {targets}")
 
         if logging:
-            print("\n--- MAPPING QUBITS ---")
-            # Intersection
-            # common = sorted(h_qubits & mr_qubits)
-            # Difference
-            # h_only = sorted(h_qubits - mr_qubits)
+            print("\n=== QUBIT SETS ===")
             mr_only = sorted(mr_qubits - h_qubits)
             h_qubits = sorted(h_qubits)
             m_qubits = sorted(m_qubits)
             mr_qubits = sorted(mr_qubits)
-            print(f"All measured data qubits: {m_qubits}, len: {len(m_qubits)}")
-            print(f"Measurement-Reset qubits: {mr_qubits}, len: {len(mr_qubits)}")
-            print(f"Qubits with a preceding Hadamard: {h_qubits}, len: {len(h_qubits)}")
-            print(f"Qubits without a Hadamard: {mr_only}, len: {len(mr_only)}")
 
-        chunked = chunk_list(measurements_out[0], len(mr_qubits), repeat=r)
+            print(f"• Data qubits (measured): {m_qubits} (count: {len(m_qubits)})")
+            print(f"• Measurement-Reset qubits: {mr_qubits} (count: {len(mr_qubits)})")
+            print(f"• Hadamard qubits: {h_qubits} (count: {len(h_qubits)})")
+            print(f"• MR without Hadamard: {mr_only} (count: {len(mr_only)})")
 
-        if logging:
-            print(f"\nOriginal measurement output: {measurements_out}")
-            print(f"Chunked measurement output: {chunked}")
+        shot_count: int = 1
+        for each_measurement in measurements_out:
+            chunked = chunk_list(each_measurement, len(mr_qubits), repeat=r)
 
-        intermediate_measurements = chunked[: self.rounds]
-        if logging:
-            print(f"\nIntermediate ancilla measurements: {intermediate_measurements}")
-        final_measurements = chunked[-1]
-        if logging:
-            print(f"Final measurements on data qubits: {final_measurements}")
+            if logging:
+                print("\n" + "=" * 40)
+                print(f"▶ Shot #{shot_count}")
+                print(f"• Raw measurement: {each_measurement}")
+                print(f"• Chunked output: {chunked}")
 
-        mapped_result: list = []
-        for item in intermediate_measurements:
-            for i in zip(item, mr_qubits):
-                if i[1] in h_qubits:
-                    mapped_result.append((*i, "ancx"))
-                else:
-                    mapped_result.append((*i, "ancz"))
+            intermediate_measurements = chunked[: self.rounds]
+            if logging:
+                print(f"• Intermediate (ancilla): {intermediate_measurements}")
+            final_measurements = chunked[-1]
+            if logging:
+                print(f"• Final (data): {final_measurements}")
 
-        for i in zip(final_measurements, m_qubits):
-            mapped_result.append((*i, "data"))
+            mapped_result: list = []
+            for item in intermediate_measurements:
+                for i in zip(item, mr_qubits):
+                    if i[1] in h_qubits:
+                        mapped_result.append((*i, "ancx"))
+                    else:
+                        mapped_result.append((*i, "ancz"))
 
-        if logging:
-            print("\n--- MAPPED RESULTS ---")
-            print(mapped_result)
+            for i in zip(final_measurements, m_qubits):
+                mapped_result.append((*i, "data"))
 
-        return mapped_result
+            if logging:
+                print("\n--- MAPPED RESULTS ---")
+                for res in mapped_result:
+                    print(f"  {res}")
+
+            shot_count += 1
+            big_mapped_res.append(mapped_result)
+        return big_mapped_res

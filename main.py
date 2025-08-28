@@ -92,7 +92,8 @@ if __name__ == "__main__":
     # For writing in a JSON
     sampling_serializable = [shot.tolist() for shot in sampling]
     if m_printing:
-        print(f"Measurement readings: {sampling_serializable}, len: {len(sampling[0])}")
+        print(f"Measurement readings: {sampling}, len: {len(sampling[0])}")
+        #print(f"Measurement readings: {sampling_serializable}, len: {len(sampling[0])}")
 
     # Mapping measurement output
     mapped_measurements = sim.measurement_mapper(sampling_serializable, logging=mapping_log)

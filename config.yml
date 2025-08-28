@@ -1,4 +1,4 @@
-task: "surface_code:rotated_memory_z"
+task: "surface_code:rotated_memory_x"
 # Valid tasks:
 # - repetition_code:memory
 # - surface_code:rotated_memory_x
@@ -9,14 +9,14 @@ task: "surface_code:rotated_memory_z"
 parameters:
   distance: 3
   # distance must be odd
-  rounds: 1
+  rounds: 10
   errors:
     after_clifford_depolarization: 0
-    before_round_data_depolarization: 0
-    before_measure_flip_probability: 0
+    before_round_data_depolarization: 0.1
+    before_measure_flip_probability: 0.1
     after_reset_flip_probability: 0
   sampling:
-    seed: 5
+    seed: Null
     shots: 1
     console_log: True
   mapping:
