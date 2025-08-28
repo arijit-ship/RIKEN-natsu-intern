@@ -256,4 +256,25 @@ class StimErrorSimulator:
 
             shot_count += 1
             big_mapped_res.append(mapped_result)
-        return big_mapped_res
+            # Just in case we need to access thsese informations
+        metadata: dict = {
+            "Data qubits (measured)": {"values": m_qubits, "count": len(m_qubits)},
+            "Measurement-Reset qubits": {"values": mr_qubits, "count": len(mr_qubits)},
+            "Hadamard qubits": {"values": h_qubits, "count": len(h_qubits)},
+            "MR without Hadamard": {"values": mr_only, "count": len(mr_only)},
+        }
+        output: dict = {"meta": metadata, "mapped": big_mapped_res}
+
+        return output
+
+    def get_q_coords(self):
+        """
+        Get STIM circuit qubit coordinates.
+        """
+
+        if not self.ec_circuit:
+            raise RuntimeError("Unable to fetch qubit coordinates. No circuit found.")
+        else:
+            coodrinates = self.ec_circuit.get_final_qubit_coordinates()
+
+        return coodrinates

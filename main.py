@@ -8,6 +8,7 @@ import time
 import yaml
 
 from src.simulator import StimErrorSimulator
+from src.helper import packing_good_stuff
 
 
 def load_config(config_path: str):
@@ -93,11 +94,18 @@ if __name__ == "__main__":
     sampling_serializable = [shot.tolist() for shot in sampling]
     if m_printing:
         print(f"\nMeasurement readings:\n{sampling}\nlen: {len(sampling[0])}")
-        #print(f"Measurement readings: {sampling_serializable}, len: {len(sampling[0])}")
+        # print(f"Measurement readings: {sampling_serializable}, len: {len(sampling[0])}")
 
     # Mapping measurement output
-    mapped_measurements = sim.measurement_mapper(sampling_serializable, logging=mapping_log)
-
+    mapped_measurements_dict = sim.measurement_mapper(sampling_serializable, logging=mapping_log)
+    mapped_measurements = mapped_measurements_dict["mapped"]
+    mapping_meta = mapped_measurements_dict["meta"]
+    # Qubit coordinates
+    qubit_coords = sim.get_q_coords()
+    # print(type(qubit_coords))
+    # print(mapped_measurements)
+    packed_good_stuff = packing_good_stuff(mapped_measurements, qubit_coords)
+    # print(packed_good_stuff)
     output: dict = {
         "config": config,
         "circuit_text": circ_str,
