@@ -7,7 +7,7 @@ import time
 
 import yaml
 
-from src.simulator import NoiseSimulator
+from src.simulator import StimErrorSimulator
 
 
 def load_config(config_path: str):
@@ -63,6 +63,8 @@ if __name__ == "__main__":
     shots: int = config["parameters"]["sampling"]["shots"]
     seed: int | None = config["parameters"]["sampling"]["seed"]
 
+    mapping_log: bool = config["parameters"]["mapping"]["console_log"]
+
     m_printing: bool = config["parameters"]["sampling"]["console_log"]
 
     error_prob_dtls: dict = config["parameters"]["errors"]
@@ -77,7 +79,7 @@ if __name__ == "__main__":
     outfile_prettify: bool = export_dtls["output"]["prettify"]
 
     # Initialize the simulator
-    sim = NoiseSimulator(task=task, distance=distance, rounds=rounds, error_probs=error_prob_dtls)
+    sim = StimErrorSimulator(task=task, distance=distance, rounds=rounds, error_probs=error_prob_dtls)
 
     if figure_exporting:
         sim.draw(figure_file, transparent=fig_bg_trans)
@@ -90,14 +92,16 @@ if __name__ == "__main__":
     # For writing in a JSON
     sampling_serializable = [shot.tolist() for shot in sampling]
     if m_printing:
-        print(f"Readings: {sampling_serializable}, len: {len(sampling[0])}")
-    
-    # Mapping measurement output
-    sim.measurement_mapper(
-        sampling_serializable, True
-    )
+        print(f"Measurement readings: {sampling_serializable}, len: {len(sampling[0])}")
 
-    output: dict = {"config": config, "circuit_text": circ_str, "measurements": sampling_serializable}
+    # Mapping measurement output
+    mapped_measurements = sim.measurement_mapper(sampling_serializable, logging=mapping_log)
+
+    output: dict = {
+        "config": config,
+        "circuit_text": circ_str,
+        "measurements": {"raw": sampling_serializable, "mapped": [list(item) for item in mapped_measurements]},
+    }
 
     # Save output in a JSON
     with open(output_file, "w") as f:

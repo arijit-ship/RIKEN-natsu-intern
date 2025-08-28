@@ -1,12 +1,11 @@
 import re
 
 import stim
+
 from src.helper import chunk_list
-from collections import defaultdict
 
 
-
-class NoiseSimulator:
+class StimErrorSimulator:
     def __init__(self, distance: int, rounds: int, error_probs: dict, task: str):
         """
         Initialize the simulator with parameters.
@@ -59,17 +58,17 @@ class NoiseSimulator:
 
         # Compile the circuit sampler
         if seed is None:
-            #sampler_d = self.ec_circuit.compile_detector_sampler()
+            # sampler_d = self.ec_circuit.compile_detector_sampler()
             sampler = self.ec_circuit.compile_sampler()
         else:
-            #sampler_d = self.ec_circuit.compile_detector_sampler(seed=seed)
+            # sampler_d = self.ec_circuit.compile_detector_sampler(seed=seed)
             sampler = self.ec_circuit.compile_sampler(seed=seed)
 
         sampling_result = sampler.sample(shots=shots)
-        
+
         return sampling_result
 
-        #return {"result": sampling_result, "length": f"{len(sampling_result)}x{len(sampling_result[0])}"}
+        # return {"result": sampling_result, "length": f"{len(sampling_result)}x{len(sampling_result[0])}"}
 
     def draw(self, filename: str | None = None, transparent: bool = True):
         """
@@ -116,8 +115,8 @@ class NoiseSimulator:
             return circ_str
         else:
             raise ValueError("File name expected")
-    
-    def measurement_mapper(self, measurements_out: list, loggig: bool):
+
+    def measurement_mapper(self, measurements_out: list, logging: bool):
         """
         Map and label the output measurement.
         """
@@ -129,66 +128,76 @@ class NoiseSimulator:
         d = self.distance
         r = self.rounds
 
-        if len(measurements_out[0]) != r * ((d**2 -1)) + d**2:
+        if len(measurements_out[0]) != r * ((d**2 - 1)) + d**2:
             raise RuntimeError("Inconsistent measurement output length.")
         else:
-            print ("Measurement output length matched")
-        print("-----------INSTRUCTION ORDER---------------")
+            if logging:
+                print("\n\nMeasurement output length matched successfully! ✅")
+
+        if logging:
+            print("\n--- INSTRUCTION ORDER ---")
         for inst in circuit:
             name = inst.name
 
             if name == "H":
-                print("Hadamard on", [t.value for t in inst.targets_copy()])
+                if logging:
+                    targets = [t.value for t in inst.targets_copy()]
+                    print(f"Hadamard gate applied to qubits: {targets}")
                 h_qubits.update(t.value for t in inst.targets_copy())
 
             elif name == "MR":
-                print("Measurement-Reset on", [t.value for t in inst.targets_copy()])
+                if logging:
+                    targets = [t.value for t in inst.targets_copy()]
+                    print(f"Measurement-Reset on qubits: {targets}")
                 mr_qubits.update(t.value for t in inst.targets_copy())
 
-            elif name.startswith("M"):  # includes M, MX, MY, MR (if you want MR separate, check first!)
-                print("Measurement:", name, "on", [t.value for t in inst.targets_copy()])
+            elif name.startswith("M"):  # includes M, MX, MY, MR
+                if logging:
+                    targets = [t.value for t in inst.targets_copy()]
+                    print(f"Measurement '{name}' on qubits: {targets}")
                 m_qubits.update(t.value for t in inst.targets_copy())
 
-        print("-----------MAPPING---------------")
-        # Intersection
-        common = sorted(h_qubits & mr_qubits)
-        # Difference
-        h_only = sorted(h_qubits - mr_qubits)
-        mr_only = sorted(mr_qubits - h_qubits)
-        h_qubits=sorted(h_qubits)
-        m_qubits = sorted(m_qubits)
-        mr_qubits=sorted(mr_qubits)
-        print("M: ", m_qubits)
-        print("MR: ",mr_qubits)
-        print("Qubits with H:", h_qubits)
-        print("Qubits without H:", mr_only)
+        if logging:
+            print("\n--- MAPPING QUBITS ---")
+            # Intersection
+            # common = sorted(h_qubits & mr_qubits)
+            # Difference
+            # h_only = sorted(h_qubits - mr_qubits)
+            mr_only = sorted(mr_qubits - h_qubits)
+            h_qubits = sorted(h_qubits)
+            m_qubits = sorted(m_qubits)
+            mr_qubits = sorted(mr_qubits)
+            print(f"All measured data qubits: {m_qubits}, len: {len(m_qubits)}")
+            print(f"Measurement-Reset qubits: {mr_qubits}, len: {len(mr_qubits)}")
+            print(f"Qubits with a preceding Hadamard: {h_qubits}, len: {len(h_qubits)}")
+            print(f"Qubits without a Hadamard: {mr_only}, len: {len(mr_only)}")
 
-        chunked = chunk_list(measurements_out[0], len(mr_qubits), repeat=r)  # [[0,1,2],[3,4,5],[6,7,8],[9]]
+        chunked = chunk_list(measurements_out[0], len(mr_qubits), repeat=r)
 
-        # Correct access
-        print(f"Original measuremet output: {measurements_out}")
-        print(f"Chunked: {chunked}")
+        if logging:
+            print(f"\nOriginal measurement output: {measurements_out}")
+            print(f"Chunked measurement output: {chunked}")
 
-        intermediate_measurements = chunked[:self.rounds]  # Ancilla only
-        print(f"Intermediate ancilla measurements: {intermediate_measurements}")
+        intermediate_measurements = chunked[: self.rounds]
+        if logging:
+            print(f"\nIntermediate ancilla measurements: {intermediate_measurements}")
         final_measurements = chunked[-1]
-        print(f"Final measurements on data qubits: {final_measurements}")
+        if logging:
+            print(f"Final measurements on data qubits: {final_measurements}")
 
         mapped_result: list = []
         for item in intermediate_measurements:
             for i in zip(item, mr_qubits):
                 if i[1] in h_qubits:
-                    mapped_result.append({i, "ancx"})
+                    mapped_result.append((*i, "ancx"))
                 else:
-                    mapped_result.append({i, "ancx"})
-                    
+                    mapped_result.append((*i, "ancz"))
+
         for i in zip(final_measurements, m_qubits):
-            mapped_result.append({i, "data"})
+            mapped_result.append((*i, "data"))
 
-        print(mapped_result)  
+        if logging:
+            print("\n--- MAPPED RESULTS ---")
+            print(mapped_result)
 
-
-
-
-
-
+        return mapped_result

@@ -9,7 +9,7 @@ task: "surface_code:rotated_memory_z"
 parameters:
   distance: 3
   # distance must be odd
-  rounds: 2
+  rounds: 1
   errors:
     after_clifford_depolarization: 0
     before_round_data_depolarization: 0
