@@ -1,3 +1,7 @@
+"""
+Helper functions.
+"""
+
 def chunk_list(lst, chunk_size: int, repeat: int) -> list:
     """
     Split lst into 'repeat' chunks of size 'chunk_size'.
@@ -23,7 +27,7 @@ def packing_good_stuff(mapped_measurements: list, coordinates: dict) -> list:
     """
     Assign the coordinates to correesponding qubits in mapped measurements.
     """
-    packed_stuff_big = []
+    packed_stuff_big: list = []
 
     for measurement in mapped_measurements:
         packed_per_sample = []
@@ -39,10 +43,10 @@ def packing_good_stuff(mapped_measurements: list, coordinates: dict) -> list:
 
 def arranging_good_stuff(packed_stuff: list, rounds: int) -> dict:
     """
-    Arrange measurement data, labeling rounds and sorting qubits by coordinates.
+    Arrange measurement data based off the coordinates.
     """
-    BIG_SORTED_RESULTS = {}
-    shots = 1
+    BIG_SORTED_RESULTS: dict = {}
+    shots: int = 1
     # print(packed_stuff)
     for item_per_shot in packed_stuff:
         # print(item_per_shot)
