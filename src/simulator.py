@@ -20,17 +20,24 @@ class StimErrorSimulator:
         before_round_data_depolarization: float = error_probs["before_round_data_depolarization"]
         before_measure_flip_probability: float = error_probs["before_measure_flip_probability"]
         after_reset_flip_probability: float = error_probs["after_reset_flip_probability"]
+        
         # Only generate circuit if distance is odd
         if self.is_distance_odd():
-            self.ec_circuit = stim.Circuit.generated(
-                self.task,  # must be positional
-                distance=self.distance,
-                rounds=self.rounds,
-                after_clifford_depolarization=after_clifford_depolarization,
-                before_round_data_depolarization=before_round_data_depolarization,
-                before_measure_flip_probability=before_measure_flip_probability,
-                after_reset_flip_probability=after_reset_flip_probability,
-            )
+            # There also constraint on task
+            if self.task == "surface_code:rotated_memory_z" or self.task == "surface_code:rotated_memory_x":
+                self.ec_circuit = stim.Circuit.generated(
+                    self.task,  # must be positional
+                    distance=self.distance,
+                    rounds=self.rounds,
+                    after_clifford_depolarization=after_clifford_depolarization,
+                    before_round_data_depolarization=before_round_data_depolarization,
+                    before_measure_flip_probability=before_measure_flip_probability,
+                    after_reset_flip_probability=after_reset_flip_probability,
+                )
+            else:
+                raise ValueError(
+                    "Unsupported task! Only supports: surface_code:rotated_memory_x, surface_code:rotated_memory_z."
+                )
         else:
             raise ValueError(f"Distance must be odd, got {self.distance}")
 

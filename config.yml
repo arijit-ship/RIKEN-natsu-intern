@@ -1,14 +1,10 @@
-task: "surface_code:rotated_memory_z"
+task: "surface_code:rotated_memory_x"
 # Valid tasks:
-# - repetition_code:memory
 # - surface_code:rotated_memory_x
 # - surface_code:rotated_memory_z
-# - surface_code:unrotated_memory_x
-# - surface_code:unrotated_memory_z
-# - color_code:memory_xyz
 parameters:
-  distance: 3 # distance must be odd
-  rounds: 2
+  distance: 7 # distance must be odd
+  rounds: 5
   errors:
     after_clifford_depolarization: 0
     before_round_data_depolarization: 0.0
