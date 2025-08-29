@@ -2,7 +2,7 @@ import re
 
 import stim
 
-from src.helper import chunk_list
+from src.good_stuff import chunk_list
 
 
 class StimErrorSimulator:

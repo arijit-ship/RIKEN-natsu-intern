@@ -8,7 +8,7 @@ import time
 import yaml
 
 from src.simulator import StimErrorSimulator
-from src.helper import packing_good_stuff
+from src.good_stuff import packing_good_stuff, arranging_good_stuff
 
 
 def load_config(config_path: str):
@@ -105,11 +105,18 @@ if __name__ == "__main__":
     # print(type(qubit_coords))
     # print(mapped_measurements)
     packed_good_stuff = packing_good_stuff(mapped_measurements, qubit_coords)
-    # print(packed_good_stuff)
+    # print("\n\n", packed_good_stuff)
+    big_output = arranging_good_stuff(packed_stuff=packed_good_stuff, rounds=rounds)
+    # print(json.dumps(big_output))
+
     output: dict = {
         "config": config,
         "circuit_text": circ_str,
-        "measurements": {"raw": sampling_serializable, "mapped": [list(item) for item in mapped_measurements]},
+        "measurements": {
+            "raw": sampling_serializable,
+            "mapped": [list(item) for item in mapped_measurements],
+            "mapped_ordered": big_output,
+        },
     }
 
     # Save output in a JSON

@@ -7,8 +7,8 @@ task: "surface_code:rotated_memory_z"
 # - surface_code:unrotated_memory_z
 # - color_code:memory_xyz
 parameters:
-  distance: 3  # distance must be odd
-  rounds: 2
+  distance: 3 # distance must be odd
+  rounds: 3
   errors:
     after_clifford_depolarization: 0
     before_round_data_depolarization: 0.0
@@ -16,7 +16,7 @@ parameters:
     after_reset_flip_probability: 0
   sampling:
     seed: Null
-    shots: 1
+    shots: 3
     console_log: True
   mapping:
     console_log: True
