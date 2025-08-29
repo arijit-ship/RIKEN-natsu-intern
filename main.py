@@ -7,8 +7,8 @@ import time
 
 import yaml
 
+from src.good_stuff import arranging_good_stuff, packing_good_stuff
 from src.simulator import StimErrorSimulator
-from src.good_stuff import packing_good_stuff, arranging_good_stuff
 
 
 def load_config(config_path: str):

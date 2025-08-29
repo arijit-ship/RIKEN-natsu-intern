@@ -7,7 +7,7 @@ task: "surface_code:rotated_memory_z"
 # - surface_code:unrotated_memory_z
 # - color_code:memory_xyz
 parameters:
-  distance: 3 # distance must be odd
+  distance: 5 # distance must be odd
   rounds: 3
   errors:
     after_clifford_depolarization: 0
