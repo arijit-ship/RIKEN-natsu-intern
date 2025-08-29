@@ -65,7 +65,7 @@ def arranging_good_stuff(packed_stuff: list, rounds: int) -> dict:
         x_anc_grouped_by_round = [
             {
                 "round": r + 1,
-                "qubits": sorted(x_anc_list[i:i + num_per_round_x], key=lambda q: (q["coords"][0], q["coords"][1])),
+                "ord_qubits": sorted(x_anc_list[i:i + num_per_round_x], key=lambda q: (q["coords"][0], q["coords"][1])),
             }
             for r, i in enumerate(range(0, len(x_anc_list), num_per_round_x))
         ]
@@ -74,13 +74,15 @@ def arranging_good_stuff(packed_stuff: list, rounds: int) -> dict:
         z_anc_grouped_by_round = [
             {
                 "round": r + 1,
-                "qubits": sorted(z_anc_list[i:i + num_per_round_z], key=lambda q: (q["coords"][0], q["coords"][1])),
+                "ord_qubits": sorted(z_anc_list[i:i + num_per_round_z], key=lambda q: (q["coords"][0], q["coords"][1])),
             }
             for r, i in enumerate(range(0, len(z_anc_list), num_per_round_z))
         ]
 
         # Sort data qubits (no rounds)
-        data_sorted = sorted(data_list, key=lambda q: (q["coords"][0], q["coords"][1]))
+        data_sorted = {
+            "ord_qubits": sorted(data_list, key=lambda q: (q["coords"][0], q["coords"][1]))
+            }
 
         BIG_SORTED_RESULTS[f"shot {shots}"] = {
             "ancx": x_anc_grouped_by_round,
