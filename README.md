@@ -1,5 +1,9 @@
 # About
-Summer research intern project at ROKEN, Kobe, Japan.
+Summer research intern project at RIKEN, Kobe, Japan.  
 Processor Research Team.
 
-# Surface code generation for Quantum Error Correction
+# Goal
+Using **STIM**, simulate surface code circuits by:  
+- Measuring ancilla and data qubits  
+- Arranging and labeling qubits  
+
