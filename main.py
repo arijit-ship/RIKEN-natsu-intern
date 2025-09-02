@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     if circuit_exporting:
         circ_str: str = sim.export_circ_txt(circuit_file)
-    
+
     sampling = sim.perform_measurement(shots=shots, seed=seed)
 
     # For writing in a JSON

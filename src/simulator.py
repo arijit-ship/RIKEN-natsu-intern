@@ -20,7 +20,7 @@ class StimErrorSimulator:
         before_round_data_depolarization: float = error_probs["before_round_data_depolarization"]
         before_measure_flip_probability: float = error_probs["before_measure_flip_probability"]
         after_reset_flip_probability: float = error_probs["after_reset_flip_probability"]
-        
+
         # Only generate circuit if distance is odd
         if self.is_distance_odd():
             # There also constraint on task

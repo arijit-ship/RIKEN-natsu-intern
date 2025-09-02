@@ -1,13 +1,12 @@
 import argparse
 
-import matplotlib.pyplot as plt
-import numpy
 import stim
 import stimcirq
 from cirq.contrib.svg import SVGCircuit
-#from IPython.terminal.debugger import TerminalPdb
 
-#ipdb = TerminalPdb()
+# from IPython.terminal.debugger import TerminalPdb
+
+# ipdb = TerminalPdb()
 
 
 def parse_arguments():
@@ -22,8 +21,6 @@ def parse_arguments():
     parser.add_argument("--print", type=bool, default=False, help="print circuit to svg and text file")
     args = parser.parse_args()
     return args
-
-
 
 
 def print_circuits(distance: int, rounds: int, error_rate: float, meas_error_rate: float):
@@ -65,11 +62,8 @@ def print_circuits(distance: int, rounds: int, error_rate: float, meas_error_rat
     circuit_level.to_file("circuit_level.txt")
 
 
-
-
 def main():
     args = parse_arguments()
-
 
     if args.print:
         print_circuits(
