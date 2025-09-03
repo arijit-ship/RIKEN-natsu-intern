@@ -11,7 +11,7 @@ parameters:
     before_measure_flip_probability: 0.0
     after_reset_flip_probability: 0.0
   sampling:
-    seed: 42
+    seed: 2
     shots: 1
     console_log: True
   mapping:
