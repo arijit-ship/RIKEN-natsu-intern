@@ -1,5 +1,5 @@
-````markdown
 # Quantum Surface Code Simulation  
+
 **Summer Research Internship Project – RIKEN, Kobe, Japan**  
 Processor Research Team
 
@@ -124,5 +124,3 @@ isort src/
 * **RIKEN, Kobe, Japan** – Processor Research Team
 * **STIM** – Surface code simulator framework
 
-```
-```
