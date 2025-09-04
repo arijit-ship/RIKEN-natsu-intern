@@ -34,22 +34,40 @@ The project uses a YAML configuration file to set simulation parameters such as:
 Example configuration snippet:
 
 ```yaml
-task: surface_code
+task: "surface_code:rotated_memory_z"
+# Valid tasks:
+# - surface_code:rotated_memory_x
+# - surface_code:rotated_memory_z
 parameters:
-  distance: 3
-  rounds: 5
-  sampling:
-    shots: 1000
-    seed: 42
+  distance: 3 # distance must be odd
+  rounds: 4
   errors:
-    depolarizing_prob: 0.01
+    after_clifford_depolarization: 0.0
+    before_round_data_depolarization: 0.0
+    before_measure_flip_probability: 0.0
+    after_reset_flip_probability: 0.0
+  sampling:
+    seed: Null
+    shots: 3
+    console_log: True
+  mapping:
+    console_log: True
 exports:
+  figure:
+    exporting: True
+    trans_bg: False
+    type:
+    file: "output/new_test_fig.svg"
+  circuit:
+    exporting: True
+    file: "output/test_circ.txt"
   output:
-    file: output.json
-    prettify: true
+    file: "output/output.json"
+    prettify: True
   pdf_report:
-    exporting: true
-    file: report.pdf
+    exporting: True
+    file: "examples/example_report.pdf"
+
 ```
 
 # YAML Configuration Overview
