@@ -8,6 +8,7 @@ import time
 import yaml
 
 from src.good_stuff import arranging_good_stuff, packing_good_stuff
+from src.report import generate_report_pdf
 from src.simulator import StimErrorSimulator
 
 
@@ -78,6 +79,8 @@ if __name__ == "__main__":
     circuit_file: str = export_dtls["circuit"]["file"]
     output_file: str = export_dtls["output"]["file"]
     outfile_prettify: bool = export_dtls["output"]["prettify"]
+    pdf_report: bool = export_dtls["pdf_report"]["exporting"]
+    pdf_report_file: str = export_dtls["pdf_report"]["file"]
 
     # Initialize the simulator
     sim = StimErrorSimulator(task=task, distance=distance, rounds=rounds, error_probs=error_prob_dtls)
@@ -146,3 +149,19 @@ if __name__ == "__main__":
 
     with open(unique_filepath, "w") as f:
         f.write(serialized.decode("utf-8"))
+
+    if pdf_report:
+        try:
+            # Ensure parent directories exist
+            pdf_dir = os.path.dirname(pdf_report_file)
+            if pdf_dir and not os.path.exists(pdf_dir):
+                os.makedirs(pdf_dir, exist_ok=True)
+
+            # Generate PDF
+            generate_report_pdf(json_path=output_file, pdf_path=pdf_report_file)
+            print(f"✅ PDF report generated: {pdf_report_file}")
+
+        except Exception as e:
+            print("⚠ PDF Report generation failed.")
+            print(f"Reason: {e}")
+            print(f"JSON file used: {output_file}")

@@ -1,0 +1,637 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>JSON Viewer</title>
+  <link href="https://cdn.jsdelivr.net/npm/jsoneditor@9.10.0/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
+  <script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.10.0/dist/jsoneditor.min.js"></script>
+  <style>
+    body { margin: 0; }
+    #jsoneditor { width: 100%; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="jsoneditor"></div>
+  <script>
+    const container = document.getElementById("jsoneditor");
+    const options = {
+      mode: "view",
+      mainMenuBar: true,
+      navigationBar: true
+    };
+    const editor = new JSONEditor(container, options);
+    const json = {
+  "config": {
+    "task": "surface_code:rotated_memory_z",
+    "parameters": {
+      "distance": 3,
+      "rounds": 1,
+      "errors": {
+        "after_clifford_depolarization": 0.0,
+        "before_round_data_depolarization": 0.0,
+        "before_measure_flip_probability": 0.0,
+        "after_reset_flip_probability": 0.0
+      },
+      "sampling": {
+        "seed": null,
+        "shots": 2,
+        "console_log": true
+      },
+      "mapping": {
+        "console_log": true
+      }
+    },
+    "exports": {
+      "figure": {
+        "exporting": true,
+        "trans_bg": false,
+        "type": null,
+        "file": "output/test_fig.svg"
+      },
+      "circuit": {
+        "exporting": true,
+        "file": "output/test_circ.txt"
+      },
+      "output": {
+        "file": "output/output.json",
+        "prettify": true
+      },
+      "pdf": {
+        "exporting": true,
+        "file": "example/example1.pdf"
+      }
+    }
+  },
+  "circuit_text": "QUBIT_COORDS(1, 1) 1\nQUBIT_COORDS(2, 0) 2\nQUBIT_COORDS(3, 1) 3\nQUBIT_COORDS(5, 1) 5\nQUBIT_COORDS(1, 3) 8\nQUBIT_COORDS(2, 2) 9\nQUBIT_COORDS(3, 3) 10\nQUBIT_COORDS(4, 2) 11\nQUBIT_COORDS(5, 3) 12\nQUBIT_COORDS(6, 2) 13\nQUBIT_COORDS(0, 4) 14\nQUBIT_COORDS(1, 5) 15\nQUBIT_COORDS(2, 4) 16\nQUBIT_COORDS(3, 5) 17\nQUBIT_COORDS(4, 4) 18\nQUBIT_COORDS(5, 5) 19\nQUBIT_COORDS(4, 6) 25\nR 1 3 5 8 10 12 15 17 19 2 9 11 13 14 16 18 25\nTICK\nH 2 11 16 25\nTICK\nCX 2 3 16 17 11 12 15 14 10 9 19 18\nTICK\nCX 2 1 16 15 11 10 8 14 3 9 12 18\nTICK\nCX 16 10 11 5 25 19 8 9 17 18 12 13\nTICK\nCX 16 8 11 3 25 17 1 9 10 18 5 13\nTICK\nH 2 11 16 25\nTICK\nMR 2 9 11 13 14 16 18 25\nDETECTOR(0, 4, 0) rec[-4]\nDETECTOR(2, 2, 0) rec[-7]\nDETECTOR(4, 4, 0) rec[-2]\nDETECTOR(6, 2, 0) rec[-5]\nM 1 3 5 8 10 12 15 17 19\nDETECTOR(0, 4, 1) rec[-3] rec[-6] rec[-13]\nDETECTOR(2, 2, 1) rec[-5] rec[-6] rec[-8] rec[-9] rec[-16]\nDETECTOR(4, 4, 1) rec[-1] rec[-2] rec[-4] rec[-5] rec[-11]\nDETECTOR(6, 2, 1) rec[-4] rec[-7] rec[-14]\nOBSERVABLE_INCLUDE(0) rec[-7] rec[-8] rec[-9]",
+  "measurements": {
+    "raw": [
+      [
+        true,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    ],
+    "mapped": [
+      [
+        [
+          true,
+          2,
+          "ancx"
+        ],
+        [
+          false,
+          9,
+          "ancz"
+        ],
+        [
+          true,
+          11,
+          "ancx"
+        ],
+        [
+          false,
+          13,
+          "ancz"
+        ],
+        [
+          false,
+          14,
+          "ancz"
+        ],
+        [
+          true,
+          16,
+          "ancx"
+        ],
+        [
+          false,
+          18,
+          "ancz"
+        ],
+        [
+          false,
+          25,
+          "ancx"
+        ],
+        [
+          false,
+          1,
+          "data"
+        ],
+        [
+          false,
+          3,
+          "data"
+        ],
+        [
+          false,
+          5,
+          "data"
+        ],
+        [
+          false,
+          8,
+          "data"
+        ],
+        [
+          false,
+          10,
+          "data"
+        ],
+        [
+          false,
+          12,
+          "data"
+        ],
+        [
+          false,
+          15,
+          "data"
+        ],
+        [
+          true,
+          17,
+          "data"
+        ],
+        [
+          true,
+          19,
+          "data"
+        ]
+      ],
+      [
+        [
+          false,
+          2,
+          "ancx"
+        ],
+        [
+          false,
+          9,
+          "ancz"
+        ],
+        [
+          false,
+          11,
+          "ancx"
+        ],
+        [
+          false,
+          13,
+          "ancz"
+        ],
+        [
+          false,
+          14,
+          "ancz"
+        ],
+        [
+          false,
+          16,
+          "ancx"
+        ],
+        [
+          false,
+          18,
+          "ancz"
+        ],
+        [
+          true,
+          25,
+          "ancx"
+        ],
+        [
+          true,
+          1,
+          "data"
+        ],
+        [
+          true,
+          3,
+          "data"
+        ],
+        [
+          false,
+          5,
+          "data"
+        ],
+        [
+          false,
+          8,
+          "data"
+        ],
+        [
+          false,
+          10,
+          "data"
+        ],
+        [
+          false,
+          12,
+          "data"
+        ],
+        [
+          false,
+          15,
+          "data"
+        ],
+        [
+          false,
+          17,
+          "data"
+        ],
+        [
+          false,
+          19,
+          "data"
+        ]
+      ]
+    ],
+    "mapped_ordered": {
+      "shot 1": {
+        "ancx": [
+          {
+            "round": 1,
+            "ord_qubits": [
+              {
+                "qubit": 2,
+                "value": true,
+                "type": "ancx",
+                "coords": [
+                  2.0,
+                  0.0
+                ]
+              },
+              {
+                "qubit": 16,
+                "value": true,
+                "type": "ancx",
+                "coords": [
+                  2.0,
+                  4.0
+                ]
+              },
+              {
+                "qubit": 11,
+                "value": true,
+                "type": "ancx",
+                "coords": [
+                  4.0,
+                  2.0
+                ]
+              },
+              {
+                "qubit": 25,
+                "value": false,
+                "type": "ancx",
+                "coords": [
+                  4.0,
+                  6.0
+                ]
+              }
+            ]
+          }
+        ],
+        "ancz": [
+          {
+            "round": 1,
+            "ord_qubits": [
+              {
+                "qubit": 14,
+                "value": false,
+                "type": "ancz",
+                "coords": [
+                  0.0,
+                  4.0
+                ]
+              },
+              {
+                "qubit": 9,
+                "value": false,
+                "type": "ancz",
+                "coords": [
+                  2.0,
+                  2.0
+                ]
+              },
+              {
+                "qubit": 18,
+                "value": false,
+                "type": "ancz",
+                "coords": [
+                  4.0,
+                  4.0
+                ]
+              },
+              {
+                "qubit": 13,
+                "value": false,
+                "type": "ancz",
+                "coords": [
+                  6.0,
+                  2.0
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "ord_qubits": [
+            {
+              "qubit": 1,
+              "value": false,
+              "type": "data",
+              "coords": [
+                1.0,
+                1.0
+              ]
+            },
+            {
+              "qubit": 8,
+              "value": false,
+              "type": "data",
+              "coords": [
+                1.0,
+                3.0
+              ]
+            },
+            {
+              "qubit": 15,
+              "value": false,
+              "type": "data",
+              "coords": [
+                1.0,
+                5.0
+              ]
+            },
+            {
+              "qubit": 3,
+              "value": false,
+              "type": "data",
+              "coords": [
+                3.0,
+                1.0
+              ]
+            },
+            {
+              "qubit": 10,
+              "value": false,
+              "type": "data",
+              "coords": [
+                3.0,
+                3.0
+              ]
+            },
+            {
+              "qubit": 17,
+              "value": true,
+              "type": "data",
+              "coords": [
+                3.0,
+                5.0
+              ]
+            },
+            {
+              "qubit": 5,
+              "value": false,
+              "type": "data",
+              "coords": [
+                5.0,
+                1.0
+              ]
+            },
+            {
+              "qubit": 12,
+              "value": false,
+              "type": "data",
+              "coords": [
+                5.0,
+                3.0
+              ]
+            },
+            {
+              "qubit": 19,
+              "value": true,
+              "type": "data",
+              "coords": [
+                5.0,
+                5.0
+              ]
+            }
+          ]
+        }
+      },
+      "shot 2": {
+        "ancx": [
+          {
+            "round": 1,
+            "ord_qubits": [
+              {
+                "qubit": 2,
+                "value": false,
+                "type": "ancx",
+                "coords": [
+                  2.0,
+                  0.0
+                ]
+              },
+              {
+                "qubit": 16,
+                "value": false,
+                "type": "ancx",
+                "coords": [
+                  2.0,
+                  4.0
+                ]
+              },
+              {
+                "qubit": 11,
+                "value": false,
+                "type": "ancx",
+                "coords": [
+                  4.0,
+                  2.0
+                ]
+              },
+              {
+                "qubit": 25,
+                "value": true,
+                "type": "ancx",
+                "coords": [
+                  4.0,
+                  6.0
+                ]
+              }
+            ]
+          }
+        ],
+        "ancz": [
+          {
+            "round": 1,
+            "ord_qubits": [
+              {
+                "qubit": 14,
+                "value": false,
+                "type": "ancz",
+                "coords": [
+                  0.0,
+                  4.0
+                ]
+              },
+              {
+                "qubit": 9,
+                "value": false,
+                "type": "ancz",
+                "coords": [
+                  2.0,
+                  2.0
+                ]
+              },
+              {
+                "qubit": 18,
+                "value": false,
+                "type": "ancz",
+                "coords": [
+                  4.0,
+                  4.0
+                ]
+              },
+              {
+                "qubit": 13,
+                "value": false,
+                "type": "ancz",
+                "coords": [
+                  6.0,
+                  2.0
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "ord_qubits": [
+            {
+              "qubit": 1,
+              "value": true,
+              "type": "data",
+              "coords": [
+                1.0,
+                1.0
+              ]
+            },
+            {
+              "qubit": 8,
+              "value": false,
+              "type": "data",
+              "coords": [
+                1.0,
+                3.0
+              ]
+            },
+            {
+              "qubit": 15,
+              "value": false,
+              "type": "data",
+              "coords": [
+                1.0,
+                5.0
+              ]
+            },
+            {
+              "qubit": 3,
+              "value": true,
+              "type": "data",
+              "coords": [
+                3.0,
+                1.0
+              ]
+            },
+            {
+              "qubit": 10,
+              "value": false,
+              "type": "data",
+              "coords": [
+                3.0,
+                3.0
+              ]
+            },
+            {
+              "qubit": 17,
+              "value": false,
+              "type": "data",
+              "coords": [
+                3.0,
+                5.0
+              ]
+            },
+            {
+              "qubit": 5,
+              "value": false,
+              "type": "data",
+              "coords": [
+                5.0,
+                1.0
+              ]
+            },
+            {
+              "qubit": 12,
+              "value": false,
+              "type": "data",
+              "coords": [
+                5.0,
+                3.0
+              ]
+            },
+            {
+              "qubit": 19,
+              "value": false,
+              "type": "data",
+              "coords": [
+                5.0,
+                5.0
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+};
+    editor.set(json);
+  </script>
+</body>
+</html>
