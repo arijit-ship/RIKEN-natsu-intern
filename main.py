@@ -86,7 +86,7 @@ if __name__ == "__main__":
     sim = StimErrorSimulator(task=task, distance=distance, rounds=rounds, error_probs=error_prob_dtls)
 
     if figure_exporting:
-        sim.draw(figure_file, transparent=fig_bg_trans)
+        svg_str = sim.draw(figure_file, transparent=fig_bg_trans)
 
     if circuit_exporting:
         circ_str: str = sim.export_circ_txt(circuit_file)
@@ -158,7 +158,10 @@ if __name__ == "__main__":
                 os.makedirs(pdf_dir, exist_ok=True)
 
             # Generate PDF
-            generate_report_pdf(json_path=output_file, pdf_path=pdf_report_file)
+            generate_report_pdf(
+                json_path=output_file, pdf_path=pdf_report_file, svg_str=svg_str if figure_exporting else None
+            )
+
             print(f"✅ PDF report generated: {pdf_report_file}")
 
         except Exception as e:

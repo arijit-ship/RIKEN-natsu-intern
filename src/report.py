@@ -1,19 +1,35 @@
 import json
+from io import StringIO
 
+from reportlab.graphics.shapes import Drawing
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.platypus import PageBreak, Paragraph, Preformatted, SimpleDocTemplate, Spacer, Table, TableStyle
+from svglib.svglib import svg2rlg
 
 
 def generate_report_pdf(
     json_path: str,
     pdf_path: str,
+    svg_str: str | None = None,
     font_name: str = "Courier",
     title_font: str = "Courier-Bold",
     include_circuit: bool = True,
     alternate_row_color: bool = True,
 ):
+    """
+    Generate a PDF report from the JSON output of the simulator.
+
+    Parameters:
+    - json_path: path to the simulator JSON output
+    - pdf_path: path to save the PDF
+    - svg_str: optional SVG content as string for the circuit diagram
+    - font_name: typewriter font for code
+    - title_font: font for titles/headings
+    - include_circuit: include circuit text in PDF
+    - alternate_row_color: shade alternate rows in tables
+    """
     # ----------------- Load JSON -----------------
     with open(json_path, "r") as f:
         data = json.load(f)
@@ -42,14 +58,14 @@ def generate_report_pdf(
     styles["Heading3"].spaceAfter = 6
 
     styles.add(ParagraphStyle(name="MyHeading4", fontName=title_font, fontSize=11, leading=14, spaceAfter=4))
-
     styles["Code"].fontName = font_name
     styles["Code"].fontSize = 9
     styles["Code"].leading = 11
-
     styles.add(ParagraphStyle(name="NormalCourier", fontName=font_name, fontSize=10, leading=12))
 
     story = []
+
+    # ----------------- Title -----------------
     story.append(Paragraph("Quantum Simulation Report", styles["Title"]))
     story.append(Spacer(1, 12))
 
@@ -85,10 +101,31 @@ def generate_report_pdf(
     story.append(Spacer(1, 12))
     story.append(PageBreak())
 
-    # ----------------- Circuit -----------------
+    # ----------------- Circuit Text -----------------
     if include_circuit:
         story.append(Paragraph("Circuit Text", styles["Heading1"]))
         story.append(Preformatted(data["circuit_text"], styles["Code"]))
+        story.append(PageBreak())
+
+    # ----------------- SVG Diagram -----------------
+    if svg_str:
+        story.append(Paragraph("Circuit Diagram", styles["Heading1"]))
+
+        # Replace unsupported colors
+        svg_str = svg_str.replace("lightgray", "#d3d3d3")
+
+        # Load SVG from string
+        svg_io = StringIO(svg_str)
+        drawing: Drawing = svg2rlg(svg_io)
+
+        # Scale to fit page width (A4 width minus margins)
+        page_width = A4[0] - doc.leftMargin - doc.rightMargin
+        scale = page_width / drawing.width
+        drawing.width *= scale
+        drawing.height *= scale
+        drawing.scale(scale, scale)
+
+        story.append(drawing)
         story.append(PageBreak())
 
     # ----------------- Measurements -----------------

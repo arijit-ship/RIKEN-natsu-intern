@@ -3,8 +3,8 @@ task: "surface_code:rotated_memory_z"
 # - surface_code:rotated_memory_x
 # - surface_code:rotated_memory_z
 parameters:
-  distance: 5 # distance must be odd
-  rounds: 5
+  distance: 3 # distance must be odd
+  rounds: 4
   errors:
     after_clifford_depolarization: 0.0
     before_round_data_depolarization: 0.0
@@ -12,7 +12,7 @@ parameters:
     after_reset_flip_probability: 0.0
   sampling:
     seed: Null
-    shots: 20
+    shots: 3
     console_log: True
   mapping:
     console_log: True
@@ -21,7 +21,7 @@ exports:
     exporting: True
     trans_bg: False
     type:
-    file: "output/test_fig.svg"
+    file: "output/new_test_fig.svg"
   circuit:
     exporting: True
     file: "output/test_circ.txt"

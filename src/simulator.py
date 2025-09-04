@@ -101,7 +101,7 @@ class StimErrorSimulator:
         if filename:
             with open(filename, "w") as f:
                 f.write(svg_str)
-            return filename
+            return svg_str
         else:
             return svg_str if not transparent else self.ec_circuit.diagram("timeline-svg")
 
