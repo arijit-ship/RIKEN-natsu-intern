@@ -216,13 +216,13 @@ class StimErrorSimulator:
             #             if logging:
             #                 print(f"  • Measurement ({name}) → qubits {targets}")
 
+        mr_only = sorted(mr_qubits - h_qubits)
+        h_qubits = sorted(h_qubits)
+        m_qubits = sorted(m_qubits)
+        mr_qubits = sorted(mr_qubits)
+
         if logging:
             print("\n=== QUBIT SETS ===")
-            mr_only = sorted(mr_qubits - h_qubits)
-            h_qubits = sorted(h_qubits)
-            m_qubits = sorted(m_qubits)
-            mr_qubits = sorted(mr_qubits)
-
             print(f"• Data qubits (measured): {m_qubits} (count: {len(m_qubits)})")
             print(f"• Measurement-Reset qubits: {mr_qubits} (count: {len(mr_qubits)})")
             print(f"• Hadamard qubits: {h_qubits} (count: {len(h_qubits)})")

@@ -170,4 +170,4 @@ def generate_report_pdf(
 
     # ----------------- Build PDF -----------------
     doc.build(story)
-    print(f"✅ Simulation PDF generated: {pdf_path}")
+    # print(f"✅ Simulation PDF generated: {pdf_path}")
