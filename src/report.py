@@ -1,66 +1,130 @@
+import configparser
 import json
 from io import StringIO
+from pathlib import Path
 
 from reportlab.graphics.shapes import Drawing
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, LETTER
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.pdfgen import canvas
 from reportlab.platypus import PageBreak, Paragraph, Preformatted, SimpleDocTemplate, Spacer, Table, TableStyle
 from svglib.svglib import svg2rlg
 
+# ----------------- Hardcoded config path -----------------
+PDF_CONFIG_PATH = Path(__file__).resolve().parent.parent / "settings" / "pdf.ini"
 
+
+# ----------------- Helpers -----------------
+def load_pdf_config():
+    """Load PDF export settings from ../settings/pdf.ini"""
+    config = configparser.ConfigParser()
+    config.read(PDF_CONFIG_PATH)
+    return config
+
+
+def parse_color(value: str):
+    """Convert string from ini to ReportLab color. Raises error if missing."""
+    if not value:
+        raise ValueError("Color not set in pdf.ini")
+    value = value.strip()
+    if not value.startswith("#"):
+        value = "#" + value
+    return colors.HexColor(value)
+
+
+def add_page_number(canvas: canvas.Canvas, doc, cfg):
+    """Draw page numbers if enabled in config."""
+    if cfg.getboolean("options", "add_page_numbers", fallback=False):
+        page_num = canvas.getPageNumber()
+        text = f"Page {page_num}"
+        canvas.setFont("Helvetica", 9)
+        canvas.drawRightString(
+            doc.pagesize[0] - cfg["page"].getint("margin_right"),
+            cfg["page"].getint("margin_bottom") / 2,
+            text,
+        )
+
+
+# ----------------- Main Function -----------------
 def generate_report_pdf(
     json_path: str,
     pdf_path: str,
     svg_str: str | None = None,
-    font_name: str = "Courier",
-    title_font: str = "Courier-Bold",
-    include_circuit: bool = True,
-    alternate_row_color: bool = True,
 ):
     """
     Generate a PDF report from the JSON output of the simulator.
-
-    Parameters:
-    - json_path: path to the simulator JSON output
-    - pdf_path: path to save the PDF
-    - svg_str: optional SVG content as string for the circuit diagram
-    - font_name: typewriter font for code
-    - title_font: font for titles/headings
-    - include_circuit: include circuit text in PDF
-    - alternate_row_color: shade alternate rows in tables
+    All PDF settings (fonts, colors, sizes, margins, options) are read from ../settings/pdf.ini
     """
+    # ----------------- Load Config -----------------
+    cfg = load_pdf_config()
+
+    # Fonts & sizes
+    font_name = cfg["fonts"].get("normal")
+    title_font = cfg["fonts"].get("title")
+
+    title_size = cfg["sizes"].getint("title")
+    h1_size = cfg["sizes"].getint("heading1")
+    h2_size = cfg["sizes"].getint("heading2")
+    h3_size = cfg["sizes"].getint("heading3")
+    code_size = cfg["sizes"].getint("code")
+
+    # Colors (from config only)
+    header_bg = parse_color(cfg["colors"].get("header_bg"))
+    row_alt_bg = parse_color(cfg["colors"].get("row_alt_bg"))
+
+    # Options
+    include_circuit = cfg.getboolean("options", "include_circuit")
+    alternate_row_color = cfg.getboolean("options", "alternate_row_color")
+
+    # Page setup
+    page_size_name = cfg["page"].get("size").upper()
+    page_size = A4 if page_size_name == "A4" else LETTER
+    margins = {
+        "left": cfg["page"].getint("margin_left"),
+        "right": cfg["page"].getint("margin_right"),
+        "top": cfg["page"].getint("margin_top"),
+        "bottom": cfg["page"].getint("margin_bottom"),
+    }
+
     # ----------------- Load JSON -----------------
     with open(json_path, "r") as f:
         data = json.load(f)
 
-    doc = SimpleDocTemplate(pdf_path, pagesize=A4)
+    doc = SimpleDocTemplate(
+        pdf_path,
+        pagesize=page_size,
+        leftMargin=margins["left"],
+        rightMargin=margins["right"],
+        topMargin=margins["top"],
+        bottomMargin=margins["bottom"],
+    )
     styles = getSampleStyleSheet()
 
     # ----------------- Styles -----------------
     styles["Title"].fontName = title_font
-    styles["Title"].fontSize = 20
-    styles["Title"].leading = 24
+    styles["Title"].fontSize = title_size
+    styles["Title"].leading = title_size + 4
 
     styles["Heading1"].fontName = title_font
-    styles["Heading1"].fontSize = 16
-    styles["Heading1"].leading = 20
+    styles["Heading1"].fontSize = h1_size
+    styles["Heading1"].leading = h1_size + 4
     styles["Heading1"].spaceAfter = 10
 
     styles["Heading2"].fontName = title_font
-    styles["Heading2"].fontSize = 14
-    styles["Heading2"].leading = 18
+    styles["Heading2"].fontSize = h2_size
+    styles["Heading2"].leading = h2_size + 4
     styles["Heading2"].spaceAfter = 8
 
     styles["Heading3"].fontName = title_font
-    styles["Heading3"].fontSize = 12
-    styles["Heading3"].leading = 16
+    styles["Heading3"].fontSize = h3_size
+    styles["Heading3"].leading = h3_size + 4
     styles["Heading3"].spaceAfter = 6
 
     styles.add(ParagraphStyle(name="MyHeading4", fontName=title_font, fontSize=11, leading=14, spaceAfter=4))
     styles["Code"].fontName = font_name
-    styles["Code"].fontSize = 9
-    styles["Code"].leading = 11
+    styles["Code"].fontSize = code_size
+    styles["Code"].leading = code_size + 2
     styles.add(ParagraphStyle(name="NormalCourier", fontName=font_name, fontSize=10, leading=12))
 
     story = []
@@ -87,7 +151,7 @@ def generate_report_pdf(
     table = Table(config_table_data, colWidths=[250, 250])
     t_style = TableStyle(
         [
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#d3d3d3")),
+            ("BACKGROUND", (0, 0), (-1, 0), header_bg),
             ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ]
@@ -95,14 +159,14 @@ def generate_report_pdf(
     if alternate_row_color:
         for i in range(1, len(config_table_data)):
             if i % 2 == 0:
-                t_style.add("BACKGROUND", (0, i), (-1, i), colors.HexColor("#f0f0f0"))
+                t_style.add("BACKGROUND", (0, i), (-1, i), row_alt_bg)
     table.setStyle(t_style)
     story.append(table)
     story.append(Spacer(1, 12))
     story.append(PageBreak())
 
     # ----------------- Circuit Text -----------------
-    if include_circuit:
+    if include_circuit and "circuit_text" in data:
         story.append(Paragraph("Circuit Text", styles["Heading1"]))
         story.append(Preformatted(data["circuit_text"], styles["Code"]))
         story.append(PageBreak())
@@ -110,16 +174,12 @@ def generate_report_pdf(
     # ----------------- SVG Diagram -----------------
     if svg_str:
         story.append(Paragraph("Circuit Diagram", styles["Heading1"]))
-
-        # Replace unsupported colors
         svg_str = svg_str.replace("lightgray", "#d3d3d3")
-
-        # Load SVG from string
         svg_io = StringIO(svg_str)
         drawing: Drawing = svg2rlg(svg_io)
 
-        # Scale to fit page width (A4 width minus margins)
-        page_width = A4[0] - doc.leftMargin - doc.rightMargin
+        # Scale to fit page width
+        page_width = page_size[0] - margins["left"] - margins["right"]
         scale = page_width / drawing.width
         drawing.width *= scale
         drawing.height *= scale
@@ -130,7 +190,7 @@ def generate_report_pdf(
 
     # ----------------- Measurements -----------------
     story.append(Paragraph("Measurements", styles["Heading1"]))
-    mapped_ordered = data["measurements"]["mapped_ordered"]
+    mapped_ordered = data.get("measurements", {}).get("mapped_ordered", {})
 
     for shot, shot_data in mapped_ordered.items():
         story.append(Paragraph(shot.capitalize(), styles["Heading2"]))
@@ -155,19 +215,22 @@ def generate_report_pdf(
         t_style = TableStyle(
             [
                 ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#d3d3d3")),
+                ("BACKGROUND", (0, 0), (-1, 0), header_bg),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ]
         )
         if alternate_row_color:
             for i in range(1, len(rows)):
                 if i % 2 == 0:
-                    t_style.add("BACKGROUND", (0, i), (-1, i), colors.HexColor("#f0f0f0"))
+                    t_style.add("BACKGROUND", (0, i), (-1, i), row_alt_bg)
         t.setStyle(t_style)
         story.append(t)
         story.append(Spacer(1, 12))
         story.append(PageBreak())
 
     # ----------------- Build PDF -----------------
-    doc.build(story)
-    # print(f"✅ Simulation PDF generated: {pdf_path}")
+    doc.build(
+        story,
+        onFirstPage=lambda c, d: add_page_number(c, d, cfg),
+        onLaterPages=lambda c, d: add_page_number(c, d, cfg),
+    )

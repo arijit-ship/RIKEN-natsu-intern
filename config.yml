@@ -30,4 +30,4 @@ exports:
     prettify: True
   pdf_report:
     exporting: True
-    file: "examples/example_report.pdf"
+    file: "examples/example_report_ini_cngf.pdf"
