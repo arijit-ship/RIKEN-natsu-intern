@@ -1,5 +1,6 @@
 import configparser
 import json
+import re
 from io import StringIO
 from pathlib import Path
 
@@ -24,24 +25,52 @@ def load_pdf_config():
 
 
 def parse_color(value: str):
-    """Convert string from ini to ReportLab color. Raises error if missing."""
+    """Convert string from ini to ReportLab color (#RRGGBB).
+    Supports #RGB, #RRGGBB, #RRGGBBAA (drops alpha).
+    Raises ValueError if invalid.
+    """
     if not value:
         raise ValueError("Color not set in pdf.ini")
+
     value = value.strip()
     if not value.startswith("#"):
         value = "#" + value
-    return colors.HexColor(value)
+
+    match = re.fullmatch(r"#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})", value)
+    if not match:
+        raise ValueError(f"Invalid color format: {value}")
+
+    hex_code = match.group(1)
+
+    # Expand #RGB → #RRGGBB
+    if len(hex_code) == 3:
+        hex_code = "".join(ch * 2 for ch in hex_code)
+
+    # Strip alpha if present (#RRGGBBAA → #RRGGBB)
+    if len(hex_code) == 8:
+        hex_code = hex_code[:6]
+
+    return colors.HexColor(f"#{hex_code}")
+
+
+def safe_getboolean(cfg, section, key, default=False):
+    """Return a boolean from ini, fallback to default if invalid."""
+    try:
+        return cfg.getboolean(section, key, fallback=default)
+    except ValueError:
+        print(f"Warning: Invalid boolean value for [{section}] {key}, using default={default}")
+        return default
 
 
 def add_page_number(canvas: canvas.Canvas, doc, cfg):
     """Draw page numbers if enabled in config."""
-    if cfg.getboolean("options", "add_page_numbers", fallback=False):
+    if safe_getboolean(cfg, "options", "add_page_numbers", False):
         page_num = canvas.getPageNumber()
         text = f"Page {page_num}"
         canvas.setFont("Helvetica", 9)
         canvas.drawRightString(
-            doc.pagesize[0] - cfg["page"].getint("margin_right"),
-            cfg["page"].getint("margin_bottom") / 2,
+            doc.pagesize[0] - cfg["page"].getint("margin_right", 40),
+            cfg["page"].getint("margin_bottom", 50) / 2,
             text,
         )
 
@@ -60,35 +89,36 @@ def generate_report_pdf(
     cfg = load_pdf_config()
 
     # Fonts & sizes
-    font_name = cfg["fonts"].get("normal")
-    title_font = cfg["fonts"].get("title")
+    font_name = cfg["fonts"].get("normal", "Helvetica")
+    title_font = cfg["fonts"].get("title", "Helvetica-Bold")
 
-    title_size = cfg["sizes"].getint("title")
-    h1_size = cfg["sizes"].getint("heading1")
-    h2_size = cfg["sizes"].getint("heading2")
-    h3_size = cfg["sizes"].getint("heading3")
-    code_size = cfg["sizes"].getint("code")
+    title_size = cfg["sizes"].getint("title", 20)
+    h1_size = cfg["sizes"].getint("heading1", 16)
+    h2_size = cfg["sizes"].getint("heading2", 14)
+    h3_size = cfg["sizes"].getint("heading3", 12)
+    code_size = cfg["sizes"].getint("code", 9)
 
-    # Colors (from config only)
-    header_bg = parse_color(cfg["colors"].get("header_bg"))
-    row_alt_bg = parse_color(cfg["colors"].get("row_alt_bg"))
+    # Colors (from config only, validated)
+    header_bg = parse_color(cfg["colors"].get("header_bg", "#d3d3d3"))
+    row_alt_bg = parse_color(cfg["colors"].get("row_alt_bg", "#f0f0f0"))
 
-    # Options
-    include_circuit = cfg.getboolean("options", "include_circuit")
-    alternate_row_color = cfg.getboolean("options", "alternate_row_color")
+    # Options (safe boolean)
+    include_circuit = safe_getboolean(cfg, "options", "include_circuit", False)
+    alternate_row_color = safe_getboolean(cfg, "options", "alternate_row_color", False)
+    add_page_numbers = safe_getboolean(cfg, "options", "add_page_numbers", False)
 
     # Page setup
-    page_size_name = cfg["page"].get("size").upper()
+    page_size_name = cfg["page"].get("size", "A4").upper()
     page_size = A4 if page_size_name == "A4" else LETTER
     margins = {
-        "left": cfg["page"].getint("margin_left"),
-        "right": cfg["page"].getint("margin_right"),
-        "top": cfg["page"].getint("margin_top"),
-        "bottom": cfg["page"].getint("margin_bottom"),
+        "left": cfg["page"].getint("margin_left", 40),
+        "right": cfg["page"].getint("margin_right", 40),
+        "top": cfg["page"].getint("margin_top", 50),
+        "bottom": cfg["page"].getint("margin_bottom", 50),
     }
 
     # ----------------- Load JSON -----------------
-    with open(json_path, "r") as f:
+    with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     doc = SimpleDocTemplate(
@@ -166,21 +196,25 @@ def generate_report_pdf(
     story.append(PageBreak())
 
     # ----------------- Circuit Text -----------------
-    if include_circuit and "circuit_text" in data:
+    if include_circuit and data.get("circuit_text"):
         story.append(Paragraph("Circuit Text", styles["Heading1"]))
         story.append(Preformatted(data["circuit_text"], styles["Code"]))
         story.append(PageBreak())
 
-    # ----------------- SVG Diagram -----------------
-    if svg_str:
+    # ----------------- SVG Diagram (Circuit Diagram) -----------------
+    if include_circuit and svg_str:
         story.append(Paragraph("Circuit Diagram", styles["Heading1"]))
         svg_str = svg_str.replace("lightgray", "#d3d3d3")
         svg_io = StringIO(svg_str)
         drawing: Drawing = svg2rlg(svg_io)
 
-        # Scale to fit page width
+        # Scale to fit page width/height
         page_width = page_size[0] - margins["left"] - margins["right"]
-        scale = page_width / drawing.width
+        page_height = page_size[1] - margins["top"] - margins["bottom"]
+        scale_w = page_width / drawing.width
+        scale_h = page_height / drawing.height
+        scale = min(scale_w, scale_h)
+
         drawing.width *= scale
         drawing.height *= scale
         drawing.scale(scale, scale)
@@ -231,6 +265,6 @@ def generate_report_pdf(
     # ----------------- Build PDF -----------------
     doc.build(
         story,
-        onFirstPage=lambda c, d: add_page_number(c, d, cfg),
-        onLaterPages=lambda c, d: add_page_number(c, d, cfg),
+        onFirstPage=lambda c, d: add_page_number(c, d, cfg) if add_page_numbers else None,
+        onLaterPages=lambda c, d: add_page_number(c, d, cfg) if add_page_numbers else None,
     )
