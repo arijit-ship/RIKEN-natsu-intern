@@ -1,4 +1,4 @@
-task: "surface_code:rotated_memory_x"
+task: "surface_code:rotated_memory_z"
 # Valid tasks:
 # - surface_code:rotated_memory_x
 # - surface_code:rotated_memory_z
@@ -6,14 +6,14 @@ parameters:
   distance: 3 # distance must be odd
   rounds: 2
   errors:
-    after_clifford_depolarization: 0
+    after_clifford_depolarization: 0.0
     before_round_data_depolarization: 0.0
     before_measure_flip_probability: 0.0
-    after_reset_flip_probability: 0
+    after_reset_flip_probability: 0.0
   sampling:
-    seed: 42
-    shots: 1
-    console_log: True
+    seed: Null
+    shots: 3
+    console_log: False
   mapping:
     console_log: True
 exports:
@@ -21,10 +21,14 @@ exports:
     exporting: True
     trans_bg: False
     type:
-    file: "output/test_fig.svg"
+    file: "output/new_test_fig.svg"
   circuit:
     exporting: True
     file: "output/test_circ.txt"
   output:
     file: "output/output.json"
     prettify: True
+  pdf_report:
+  # More PDF related settings can be found in settings/pdf.ini
+    exporting: True
+    file: "examples/example_report_ini_cngf.pdf"

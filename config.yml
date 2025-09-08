@@ -29,5 +29,6 @@ exports:
     file: "output/output.json"
     prettify: True
   pdf_report:
+  # More PDF related settings can be found in settings/pdf.ini
     exporting: True
-    file: "examples/example_report_ini_cngf.pdf"
+    file: "examples/example_report.pdf"
