@@ -1,3 +1,8 @@
+"""
+Generate PDF reports.
+PDF related seetings are read from ../setingg/pdf.ini
+"""
+
 import configparser
 import json
 import re
