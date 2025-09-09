@@ -53,34 +53,40 @@ if __name__ == "__main__":
         print(f"Error: {e}")
         sys.exit(1)
 
-    # Get the config file path from command-line arguments
-    config_file = sys.argv[1]
-    config = load_config(config_file)
+    # -----------------------------
+    # Parse config parameters safely
+    # -----------------------------
+    if config:
+        try:
+            # Parsing the different params from config
+            task: str = config["task"]
+            distance: int = config["parameters"]["distance"]
+            rounds: int = config["parameters"]["rounds"]
 
-    # Parsing the different params from config
-    task: str = config["task"]
-    distance: int = config["parameters"]["distance"]
-    rounds: int = config["parameters"]["rounds"]
+            shots: int = config["parameters"]["sampling"]["shots"]
+            seed: int | None = config["parameters"]["sampling"]["seed"]
 
-    shots: int = config["parameters"]["sampling"]["shots"]
-    seed: int | None = config["parameters"]["sampling"]["seed"]
+            mapping_log: bool = config["parameters"]["mapping"]["console_log"]
 
-    mapping_log: bool = config["parameters"]["mapping"]["console_log"]
+            m_printing: bool = config["parameters"]["sampling"]["console_log"]
 
-    m_printing: bool = config["parameters"]["sampling"]["console_log"]
+            error_prob_dtls: dict = config["parameters"]["errors"]
 
-    error_prob_dtls: dict = config["parameters"]["errors"]
+            export_dtls: dict = config["exports"]
+            figure_exporting: bool = export_dtls["figure"]["exporting"]
+            fig_bg_trans: bool = export_dtls["figure"]["trans_bg"]
+            figure_file: str = export_dtls["figure"]["file"]
+            circuit_exporting: bool = export_dtls["circuit"]["exporting"]
+            circuit_file: str = export_dtls["circuit"]["file"]
+            output_file: str = export_dtls["output"]["file"]
+            outfile_prettify: bool = export_dtls["output"]["prettify"]
+            pdf_report: bool = export_dtls["pdf_report"]["exporting"]
+            pdf_report_file: str = export_dtls["pdf_report"]["file"]
 
-    export_dtls: dict = config["exports"]
-    figure_exporting: bool = export_dtls["figure"]["exporting"]
-    fig_bg_trans: bool = export_dtls["figure"]["trans_bg"]
-    figure_file: str = export_dtls["figure"]["file"]
-    circuit_exporting: bool = export_dtls["circuit"]["exporting"]
-    circuit_file: str = export_dtls["circuit"]["file"]
-    output_file: str = export_dtls["output"]["file"]
-    outfile_prettify: bool = export_dtls["output"]["prettify"]
-    pdf_report: bool = export_dtls["pdf_report"]["exporting"]
-    pdf_report_file: str = export_dtls["pdf_report"]["file"]
+        except KeyError as e:
+            raise ValueError(f"Bad config! Missing key in config: {e}")
+        except TypeError as e:
+            raise ValueError(f"Bad config! Invalid structure in config: {e}")
 
     # Initialize the simulator
     sim = StimErrorSimulator(task=task, distance=distance, rounds=rounds, error_probs=error_prob_dtls)
@@ -162,7 +168,7 @@ if __name__ == "__main__":
                 json_path=output_file, pdf_path=pdf_report_file, svg_str=svg_str if figure_exporting else None
             )
 
-            print(f"✅ PDF report generated: {pdf_report_file}")
+            print(f"\n✅ PDF report generated: {pdf_report_file}\n")
 
         except Exception as e:
             print("⚠ PDF Report generation failed.")
