@@ -4,7 +4,7 @@ task: "surface_code:rotated_memory_z"
 # - surface_code:rotated_memory_z
 parameters:
   distance: 3 # distance must be odd
-  rounds: 2
+  rounds: 3
   errors:
     after_clifford_depolarization: 0.0
     before_round_data_depolarization: 0.0
@@ -12,7 +12,7 @@ parameters:
     after_reset_flip_probability: 0.0
   sampling:
     seed: 5
-    shots: 2
+    shots: 1
     console_log: True
   mapping:
     console_log: True
