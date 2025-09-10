@@ -12,7 +12,7 @@ parameters:
     after_reset_flip_probability: 0.0
   sampling:
     seed: 5
-    shots: 1
+    shots: 3
     console_log: True
   mapping:
     console_log: True
