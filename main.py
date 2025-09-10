@@ -64,6 +64,7 @@ if __name__ == "__main__":
 
     shots: int | None = None
     seed: int | None = None
+    skip_ref_sample: bool = False
 
     mapping_log: bool = False
 
@@ -100,6 +101,7 @@ if __name__ == "__main__":
 
             shots = config["parameters"]["sampling"]["shots"]
             seed = config["parameters"]["sampling"].get("seed", None)
+            skip_ref_sample = config["parameters"]["sampling"]["skip_ref_sample"]
 
             mapping_log = config["parameters"]["mapping"]["console_log"]
 
@@ -136,7 +138,7 @@ if __name__ == "__main__":
     if circuit_exporting:
         CIRC_STR = sim.export_circ_txt(circuit_file)
 
-    sampling = sim.perform_measurement(shots=shots, seed=seed)
+    sampling = sim.perform_measurement(skip_ref=skip_ref_sample, shots=shots, seed=seed)
 
     # For writing in a JSON
     sampling_serializable = [shot.tolist() for shot in sampling]

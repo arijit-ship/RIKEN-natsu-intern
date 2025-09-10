@@ -51,7 +51,7 @@ class StimErrorSimulator:
             raise RuntimeError("Circuit not constructed (distance was even).")
         return self.ec_circuit
 
-    def perform_measurement(self, shots: int, seed: int | None = None):
+    def perform_measurement(self, skip_ref: bool, shots: int, seed: int | None = None):
         """
         Performs measurements for the circuit and prints results round by round.
 
@@ -66,10 +66,10 @@ class StimErrorSimulator:
         # Compile the circuit sampler
         if seed is None:
             # sampler_d = self.ec_circuit.compile_detector_sampler()
-            sampler = self.ec_circuit.compile_sampler()
+            sampler = self.ec_circuit.compile_sampler(skip_reference_sample=skip_ref)
         else:
             # sampler_d = self.ec_circuit.compile_detector_sampler(seed=seed)
-            sampler = self.ec_circuit.compile_sampler(seed=seed)
+            sampler = self.ec_circuit.compile_sampler(skip_reference_sample=skip_ref, seed=seed)
 
         sampling_result = sampler.sample(shots=shots)
 

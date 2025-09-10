@@ -12,6 +12,7 @@ parameters:
     after_reset_flip_probability: 0.0
   sampling:
     seed: 5
+    skip_ref_sample: False
     shots: 3
     console_log: True
   mapping:
