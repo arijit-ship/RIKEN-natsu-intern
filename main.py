@@ -7,6 +7,7 @@ import time
 
 import yaml
 
+from src.bitstreamer import bitstreamer
 from src.good_stuff import arranging_good_stuff, packing_good_stuff
 from src.report import generate_report_pdf
 from src.simulator import StimErrorSimulator
@@ -67,6 +68,10 @@ if __name__ == "__main__":
             seed: int | None = config["parameters"]["sampling"]["seed"]
 
             mapping_log: bool = config["parameters"]["mapping"]["console_log"]
+
+            bitstreaming: bool = config["bitstream"]["exporting"]
+            bitstreaming_fmt: str = config["bitstream"]["format"]
+            bitstreaming_logging: bool = config["bitstream"]["console_log"]
 
             m_printing: bool = config["parameters"]["sampling"]["console_log"]
 
@@ -174,3 +179,9 @@ if __name__ == "__main__":
             print("⚠ PDF Report generation failed.")
             print(f"Reason: {e}")
             print(f"JSON file used: {output_file}")
+
+    if bitstreaming:
+        mapped_output = output["measurements"]["mapped_ordered"]
+        bitstream_str = bitstreamer(mapped_output, fmt=bitstreaming_fmt)
+        if bitstreaming_logging:
+            print(f"\nBitstream with format {bitstreaming_fmt}: {bitstream_str}\n")

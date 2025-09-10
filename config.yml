@@ -12,10 +12,14 @@ parameters:
     after_reset_flip_probability: 0.0
   sampling:
     seed: 5
-    shots: 6
+    shots: 2
     console_log: True
   mapping:
     console_log: True
+bitstream:
+  exporting: True
+  format: "zxd"
+  console_log: True
 exports:
   figure:
     exporting: True
