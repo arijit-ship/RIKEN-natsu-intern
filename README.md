@@ -34,76 +34,85 @@ The project uses a YAML configuration file to set simulation parameters such as:
 Example configuration snippet:
 
 ```yaml
+# Surface code circuit configuration for rotated Z memory.
 task: "surface_code:rotated_memory_z"
-# Valid tasks:
-# - surface_code:rotated_memory_x
-# - surface_code:rotated_memory_z
+
 parameters:
-  distance: 3 # distance must be odd
-  rounds: 4
+  distance: 3  # Surface code distance (must be odd)
+  rounds: 3    # Number of stabilizer measurement rounds
   errors:
     after_clifford_depolarization: 0.0
     before_round_data_depolarization: 0.0
     before_measure_flip_probability: 0.0
     after_reset_flip_probability: 0.0
   sampling:
-    seed: Null
+    seed: 5
+    skip_ref_sample: False
     shots: 3
     console_log: True
   mapping:
     console_log: True
+
+bitstream:
+  exporting: True
+  format: "zxd"
+  console_log: True
+
 exports:
   figure:
     exporting: True
     trans_bg: False
     type:
-    file: "output/new_test_fig.svg"
+    file: "output/CircuitFigure.svg"
   circuit:
     exporting: True
-    file: "output/test_circ.txt"
+    file: "output/CircuitText.txt"
   output:
     file: "output/output.json"
     prettify: True
   pdf_report:
     exporting: True
     file: "examples/example_report.pdf"
-
 ```
+
+---
 
 # YAML Configuration Overview
 
-The following table describes each key in the YAML configuration file for the surface code simulation project.
-
-| **Key** | **Description** | **Example / Notes** |
-|---------|-----------------|------------------|
-| `task` | Specifies the simulation task to run. | `"surface_code:rotated_memory_z"` <br> Valid options: `"surface_code:rotated_memory_x"`, `"surface_code:rotated_memory_z"` |
-| `parameters.distance` | The code distance for the surface code. Must be an **odd integer**. | `3` |
-| `parameters.rounds` | Number of syndrome measurement rounds to simulate. | `4` |
-| `parameters.errors.after_clifford_depolarization` | Depolarization probability applied after Clifford gates. | `0.0` |
-| `parameters.errors.before_round_data_depolarization` | Depolarization probability applied to data qubits **before each round**. | `0.0` |
-| `parameters.errors.before_measure_flip_probability` | Probability of flipping a qubit **before measurement**. | `0.0` |
-| `parameters.errors.after_reset_flip_probability` | Probability of flipping a qubit **after reset**. | `0.0` |
-| `parameters.sampling.seed` | Seed for random number generator; `Null` means random. | `Null` |
-| `parameters.sampling.shots` | Number of repetitions (shots) for measurement. | `3` |
-| `parameters.sampling.console_log` | Enable logging measurement progress to console. | `True` |
-| `parameters.mapping.console_log` | Enable logging qubit mapping steps to console. | `True` |
-| `exports.figure.exporting` | Whether to export the simulation figure as SVG. | `True` |
-| `exports.figure.trans_bg` | If `True`, generates figure with transparent background. | `False` |
-| `exports.figure.type` | Type of figure (optional, currently unused). | *(empty)* |
-| `exports.figure.file` | Output file path for the figure. | `"output/new_test_fig.svg"` |
-| `exports.circuit.exporting` | Whether to export the generated circuit as text. | `True` |
-| `exports.circuit.file` | Output file path for the circuit. | `"output/test_circ.txt"` |
-| `exports.output.file` | JSON output file path. | `"output/output.json"` |
-| `exports.output.prettify` | Whether to pretty-print JSON output. | `True` |
-| `exports.pdf_report.exporting` | Whether to generate a PDF report. | `True` |
-| `exports.pdf_report.file` | Output file path for the PDF report. | `"examples/example_report.pdf"` |
+| **Key**                                              | **Description**                                                      | **Example / Notes**                                                                                                        |
+| ---------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `task`                                               | Specifies the simulation task to run.                                | `"surface_code:rotated_memory_z"` <br> Valid options: `"surface_code:rotated_memory_x"`, `"surface_code:rotated_memory_z"` |
+| `parameters.distance`                                | Surface code distance (odd integer).                                 | `3`                                                                                                                        |
+| `parameters.rounds`                                  | Number of syndrome measurement rounds.                               | `3`                                                                                                                        |
+| `parameters.errors.after_clifford_depolarization`    | Depolarization probability applied after Clifford gates.             | `0.0`                                                                                                                      |
+| `parameters.errors.before_round_data_depolarization` | Depolarization probability applied to data qubits before each round. | `0.0`                                                                                                                      |
+| `parameters.errors.before_measure_flip_probability`  | Probability of flipping a qubit before measurement.                  | `0.0`                                                                                                                      |
+| `parameters.errors.after_reset_flip_probability`     | Probability of flipping a qubit after reset.                         | `0.0`                                                                                                                      |
+| `parameters.sampling.seed`                           | Seed for random number generator.                                    | `5`                                                                                                                        |
+| `parameters.sampling.skip_ref_sample`                | Skip computing reference sample (report only flips).                 | `False`                                                                                                                    |
+| `parameters.sampling.shots`                          | Number of repetitions (shots) for measurement.                       | `3`                                                                                                                        |
+| `parameters.sampling.console_log`                    | Enable logging measurement progress.                                 | `True`                                                                                                                     |
+| `parameters.mapping.console_log`                     | Enable logging qubit mapping steps.                                  | `True`                                                                                                                     |
+| `bitstream.exporting`                                | Export compiled bitstream.                                           | `True`                                                                                                                     |
+| `bitstream.format`                                   | Format of exported bitstream.                                        | `"zxd"`                                                                                                                    |
+| `bitstream.console_log`                              | Log bitstream export info.                                           | `True`                                                                                                                     |
+| `exports.figure.exporting`                           | Export circuit figure as SVG.                                        | `True`                                                                                                                     |
+| `exports.figure.trans_bg`                            | Transparent background for figure.                                   | `False`                                                                                                                    |
+| `exports.figure.type`                                | Figure type (optional).                                              | *(empty)*                                                                                                                  |
+| `exports.figure.file`                                | Output path for figure.                                              | `"output/CircuitFigure.svg"`                                                                                               |
+| `exports.circuit.exporting`                          | Export circuit text.                                                 | `True`                                                                                                                     |
+| `exports.circuit.file`                               | Output path for circuit text.                                        | `"output/CircuitText.txt"`                                                                                                 |
+| `exports.output.file`                                | JSON output file path.                                               | `"output/output.json"`                                                                                                     |
+| `exports.output.prettify`                            | Pretty-print JSON output.                                            | `True`                                                                                                                     |
+| `exports.pdf_report.exporting`                       | Export PDF report.                                                   | `True`                                                                                                                     |
+| `exports.pdf_report.file`                            | Output path for PDF report.                                          | `"examples/example_report.pdf"`                                                                                            |
 
 ### Notes:
-- `distance` must always be **odd** for proper surface code simulation.  
-- `rounds` determines the number of repeated syndrome measurements.  
-- Error probabilities are currently set to `0.0` (ideal noise-free simulation) but can be tuned for realistic simulations.  
-- Export paths must exist or will be created by the script.  
-- PDF report, circuit text, and SVG figure are optional outputs controlled by the `exports` section.
+
+* `distance` must always be **odd**.
+* `rounds` determines the number of repeated syndrome measurements.
+* Error probabilities are currently set to `0.0` (ideal, noise-free simulation).
+* Export paths must exist or will be created by the script.
 
 ---
 
@@ -141,4 +150,3 @@ isort src/
 
 * **RIKEN, Kobe, Japan** – Processor Research Team
 * **STIM** – Surface code simulator framework
-
