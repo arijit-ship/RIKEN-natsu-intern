@@ -146,6 +146,18 @@ isort src/
 
 ---
 
+### ⚠️ Cross-Platform Notice
+
+This project has been **tested on Linux (Ubuntu) only**.
+
+While we use Python's `pathlib` for paths and standard libraries where possible, **other operating systems (Windows, macOS) may require adjustments**.
+
+**Recommendations for non-Linux users:**
+- Check file paths, especially relative paths like `PDF_CONFIG_PATH`.
+- Ensure all required config files (e.g., `pdf.ini`) exist at the expected locations.
+- Consider using the `PROJECT_ROOT` environment variable to override paths if needed.
+
+
 ## Acknowledgements
 
 * **RIKEN, Kobe, Japan** – Processor Research Team

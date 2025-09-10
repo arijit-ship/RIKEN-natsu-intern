@@ -29,6 +29,10 @@ def load_config(config_path: str):
 
 if __name__ == "__main__":
     # -----------------------------
+    #   Start time
+    # -----------------------------
+    start_time = time.time()  # Start the timer
+    # -----------------------------
     # Argument parsing
     # -----------------------------
     parser = argparse.ArgumentParser(
@@ -208,3 +212,9 @@ if __name__ == "__main__":
             print("⚠ PDF Report generation failed.")
             print(f"Reason: {e}")
             print(f"JSON file used: {output_file}")
+    # -----------------------------
+    #   End time
+    # -----------------------------
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"\n⏱ Job finished: {elapsed_time:.2f} seconds")
