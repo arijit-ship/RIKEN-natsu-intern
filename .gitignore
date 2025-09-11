@@ -4,8 +4,9 @@ env
 .vscode
 .VSCodeCounter
 
-#db
-db/
+# Ignore all SQLite DB files in db folder
+db/*.db
+
 
 
 
