@@ -4,6 +4,10 @@ env
 .vscode
 .VSCodeCounter
 
+#db
+db/
+
+
 
 src/optimizer
 # from boilerplate
