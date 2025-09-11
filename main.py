@@ -8,6 +8,7 @@ import time
 import yaml
 
 from src.bitstreamer import bitstreamer
+from src.db import store_simulation
 from src.good_stuff import arranging_good_stuff, packing_good_stuff
 from src.report import generate_report_pdf
 from src.simulator import StimErrorSimulator
@@ -62,6 +63,7 @@ if __name__ == "__main__":
     # -----------------------------
     # Pre-initialize all config variables
     # -----------------------------
+
     task: str | None = None
     distance: int | None = None
     rounds: int | None = None
@@ -90,9 +92,13 @@ if __name__ == "__main__":
     outfile_prettify: bool = False
     pdf_report: bool = False
     pdf_report_file: str = ""
-    CIRC_STR: str | None = None
+
+    circ_str: str | None = None  # was circ_str
     svg_str: str | None = None
-    BITSTREAM_STR: str | None = None
+    bitstream_str: str | None = None  # was BITSTREAM_STR
+
+    db_exporting: bool | None = None
+    db_file: str = ""
 
     # -----------------------------
     # Parse config parameters safely
@@ -127,6 +133,8 @@ if __name__ == "__main__":
             outfile_prettify = export_dtls["output"]["prettify"]
             pdf_report = export_dtls["pdf_report"]["exporting"]
             pdf_report_file = export_dtls["pdf_report"]["file"]
+            db_exporting = export_dtls["database"]["exporting"]
+            db_file = export_dtls["database"]["file"]
 
         except KeyError as e:
             raise ValueError(f"Bad config! Missing key in config: {e}")
@@ -140,7 +148,7 @@ if __name__ == "__main__":
         svg_str = sim.draw(figure_file, transparent=fig_bg_trans)
 
     if circuit_exporting:
-        CIRC_STR = sim.export_circ_txt(circuit_file)
+        circ_str = sim.export_circ_txt(circuit_file)
 
     sampling = sim.perform_measurement(skip_ref=skip_ref_sample, shots=shots, seed=seed)
 
@@ -165,7 +173,7 @@ if __name__ == "__main__":
 
     output: dict = {
         "config": config,
-        "circuit_text": CIRC_STR,
+        "circuit_text": circ_str,
         "measurements": {
             "raw": sampling_serializable,
             "mapped": [list(item) for item in mapped_measurements],
@@ -212,6 +220,11 @@ if __name__ == "__main__":
             print("⚠ PDF Report generation failed.")
             print(f"Reason: {e}")
             print(f"JSON file used: {output_file}")
+
+    if db_exporting:
+        db_path = db_file if db_file else "db/simulations.db"
+        store_simulation(output, db_file=db_path, run_id=content_hash)
+
     # -----------------------------
     #   End time
     # -----------------------------

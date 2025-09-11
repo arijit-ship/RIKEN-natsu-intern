@@ -4,16 +4,16 @@ task: "surface_code:rotated_memory_z"
 # - surface_code:rotated_memory_z
 parameters:
   distance: 3 # distance must be odd
-  rounds: 3
+  rounds: 1
   errors:
     after_clifford_depolarization: 0.0
     before_round_data_depolarization: 0.0
     before_measure_flip_probability: 0.0
     after_reset_flip_probability: 0.0
   sampling:
-    seed: 5
+    seed: 42
     skip_ref_sample: False
-    shots: 3
+    shots: 1
     console_log: True
   mapping:
     console_log: True
@@ -26,14 +26,17 @@ exports:
     exporting: True
     trans_bg: False
     type:
-    file: "output/CircuitFigure.svg"
+    file: "output/SVG/CircuitFigure.svg"
   circuit:
     exporting: True
-    file: "output/CircuitText.txt"
+    file: "output/TXT/CircuitText.txt"
   output:
-    file: "output/output.json"
+    file: "output/JSON/output.json"
     prettify: True
   pdf_report:
   # More PDF related settings can be found in settings/pdf.ini
     exporting: True
-    file: "examples/example_report.pdf"
+    file: "output/PDF/report_d9.pdf"
+  database:
+    exporting: True
+    file: "db/simulations.db"
