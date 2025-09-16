@@ -285,3 +285,45 @@ class StimErrorSimulator:
             coodrinates = self.ec_circuit.get_final_qubit_coordinates()
 
         return coodrinates
+
+    def draw_surface_code(self, filename: str | None, figtype: str, transparent: bool = False):
+        """
+        Generate and optionally save a surface code diagram as SVG.
+
+        Parameters
+        ----------
+        filename : str | None
+            Path to save the SVG. If None, only return the diagram.
+        figtype : str
+            Type of surface code to draw (passed to self.ec_circuit.diagram).
+        transparent : bool
+            If False, add a white background to the SVG.
+            Why would anyone want a transparent background. So I am hardcoding it.
+        """
+
+        valid_figtype = ["timeslice-svg", "detslice-svg"]
+
+        if self.ec_circuit is None:
+            raise RuntimeError("No circuit to draw (distance was even).")
+
+        if figtype not in valid_figtype:
+            raise ValueError(f"Invalid type '{figtype}'. Valid types are: {', '.join(valid_figtype)}")
+
+        # Generate SVG as string
+        svg_str = str(self.ec_circuit.diagram(figtype))
+
+        if not transparent:
+            # Add white background <rect> at the top
+            svg_open_tag_end = svg_str.find(">") + 1
+            viewbox_match = re.search(r'viewBox="([^"]+)"', svg_str)
+            if viewbox_match:
+                width, height = map(float, viewbox_match.group(1).split()[2:])
+                rect_tag = f'<rect width="{width}" height="{height}" fill="white"/>'
+                svg_str = svg_str[:svg_open_tag_end] + rect_tag + svg_str[svg_open_tag_end:]
+
+        if filename:
+            with open(filename, "w") as f:
+                f.write(svg_str)
+            return svg_str
+        else:
+            return svg_str

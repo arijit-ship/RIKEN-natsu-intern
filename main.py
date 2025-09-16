@@ -97,6 +97,10 @@ if __name__ == "__main__":
     svg_str: str | None = None
     bitstream_str: str | None = None  # was BITSTREAM_STR
 
+    surface_code_fig: str | None = None
+    surface_code_file: str = ""
+    surface_code_figtype: str = ""
+
     db_exporting: bool | None = None
     db_file: str = ""
 
@@ -124,17 +128,25 @@ if __name__ == "__main__":
             error_prob_dtls = config["parameters"]["errors"]
 
             export_dtls = config["exports"]
+            # Circuit SVG
             figure_exporting = export_dtls["figure"]["exporting"]
             fig_bg_trans = export_dtls["figure"]["trans_bg"]
             figure_file = export_dtls["figure"]["file"]
             circuit_exporting = export_dtls["circuit"]["exporting"]
             circuit_file = export_dtls["circuit"]["file"]
+            # JSON
             output_file = export_dtls["output"]["file"]
             outfile_prettify = export_dtls["output"]["prettify"]
+            # PDF
             pdf_report = export_dtls["pdf_report"]["exporting"]
             pdf_report_file = export_dtls["pdf_report"]["file"]
+            # Database
             db_exporting = export_dtls["database"]["exporting"]
             db_file = export_dtls["database"]["file"]
+            # Surface code fig
+            surface_code_fig = export_dtls["surface_code_fig"]["exporting"]
+            surface_code_file = export_dtls["surface_code_fig"]["file"]
+            surface_code_figtype = export_dtls["surface_code_fig"]["type"]
 
         except KeyError as e:
             raise ValueError(f"Bad config! Missing key in config: {e}")
@@ -149,6 +161,9 @@ if __name__ == "__main__":
 
     if circuit_exporting:
         circ_str = sim.export_circ_txt(circuit_file)
+
+    if surface_code_fig:
+        sim.draw_surface_code(surface_code_file, surface_code_figtype)
 
     sampling = sim.perform_measurement(skip_ref=skip_ref_sample, shots=shots, seed=seed)
 

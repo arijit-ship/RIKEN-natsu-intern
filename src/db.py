@@ -99,47 +99,47 @@ def store_simulation(sim_data: Dict[str, Any], db_file: str = "db/simulations.db
         )
 
     # 3. Store measurements
-    shots = sim_data["measurements"]["mapped_ordered"]
-    for shot_name, shot_data in shots.items():
-        shot_no = int(shot_name.split()[1])
-        for qubit_type, qubit_list in shot_data.items():
-            if isinstance(qubit_list, list):  # ancx, ancz
-                for round_data in qubit_list:
-                    round_no = round_data["round"]
-                    for q in round_data["ord_qubits"]:
-                        c.execute(
-                            """INSERT INTO measurements
-                               (run_id, shot, round, qubit, qubit_type, value, coord_x, coord_y)
-                               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                            (
-                                run_id,
-                                shot_no,
-                                round_no,
-                                q["qubit"],
-                                q["type"],
-                                q["value"],
-                                q["coords"][0],
-                                q["coords"][1],
-                            ),
-                        )
-            elif isinstance(qubit_list, dict):  # data
-                round_data = qubit_list
-                for q in round_data["ord_qubits"]:
-                    c.execute(
-                        """INSERT INTO measurements
-                           (run_id, shot, round, qubit, qubit_type, value, coord_x, coord_y)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                        (
-                            run_id,
-                            shot_no,
-                            1,  # data qubits always round 1
-                            q["qubit"],
-                            q["type"],
-                            q["value"],
-                            q["coords"][0],
-                            q["coords"][1],
-                        ),
-                    )
+    # shots = sim_data["measurements"]["mapped_ordered"]
+    # for shot_name, shot_data in shots.items():
+    #     shot_no = int(shot_name.split()[1])
+    #     for qubit_type, qubit_list in shot_data.items():
+    #         if isinstance(qubit_list, list):  # ancx, ancz
+    #             for round_data in qubit_list:
+    #                 round_no = round_data["round"]
+    #                 for q in round_data["ord_qubits"]:
+    #                     c.execute(
+    #                         """INSERT INTO measurements
+    #                            (run_id, shot, round, qubit, qubit_type, value, coord_x, coord_y)
+    #                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+    #                         (
+    #                             run_id,
+    #                             shot_no,
+    #                             round_no,
+    #                             q["qubit"],
+    #                             q["type"],
+    #                             q["value"],
+    #                             q["coords"][0],
+    #                             q["coords"][1],
+    #                         ),
+    #                     )
+    #         elif isinstance(qubit_list, dict):  # data
+    #             round_data = qubit_list
+    #             for q in round_data["ord_qubits"]:
+    #                 c.execute(
+    #                     """INSERT INTO measurements
+    #                        (run_id, shot, round, qubit, qubit_type, value, coord_x, coord_y)
+    #                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+    #                     (
+    #                         run_id,
+    #                         shot_no,
+    #                         1,  # data qubits always round 1
+    #                         q["qubit"],
+    #                         q["type"],
+    #                         q["value"],
+    #                         q["coords"][0],
+    #                         q["coords"][1],
+    #                     ),
+    #                 )
 
     conn.commit()
     conn.close()
