@@ -62,5 +62,5 @@ TEST_CASE_MEASUREMNT_OUT = [
 
 def test_measurement(simulation, stim_seed):
     # use the fixture value
-    measurement_out = simulation.perform_measurement(shots=test_config["shots"], seed=stim_seed)
+    measurement_out = simulation.perform_measurement(skip_ref=False, shots=test_config["shots"], seed=stim_seed)
     assert TEST_CASE_MEASUREMNT_OUT == measurement_out[0].tolist()

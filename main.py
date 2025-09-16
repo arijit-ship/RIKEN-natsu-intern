@@ -132,6 +132,7 @@ if __name__ == "__main__":
             figure_exporting = export_dtls["figure"]["exporting"]
             fig_bg_trans = export_dtls["figure"]["trans_bg"]
             figure_file = export_dtls["figure"]["file"]
+            # Circuit text
             circuit_exporting = export_dtls["circuit"]["exporting"]
             circuit_file = export_dtls["circuit"]["file"]
             # JSON

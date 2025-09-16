@@ -2,7 +2,6 @@ task: "surface_code:rotated_memory_z"
 # Valid tasks:
 # - surface_code:rotated_memory_x
 # - surface_code:rotated_memory_z
-
 parameters:
   distance: 3  # Must be odd
   rounds: 2
@@ -19,12 +18,10 @@ parameters:
     console_log: True
   mapping:
     console_log: True
-
 bitstream:
   exporting: True
   format: "zxd"
   console_log: True
-
 exports:
   output:
     file: "output/output.json"
@@ -32,7 +29,6 @@ exports:
   figure:
     exporting: True
     trans_bg: False  # Transparent background for SVG
-    type: "timeline-svg"  # Example type; must set a valid value
     file: "output/CircuitFigure.svg"
   surface_code_fig:
     exporting: True

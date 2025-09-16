@@ -3,17 +3,18 @@ task: "surface_code:rotated_memory_z"
 # - surface_code:rotated_memory_x
 # - surface_code:rotated_memory_z
 parameters:
-  distance: 3 # distance must be odd
-  rounds: 3
+  distance: 3  # Must be odd
+  rounds: 2
   errors:
-    after_clifford_depolarization: 0.0
-    before_round_data_depolarization: 0.0
-    before_measure_flip_probability: 0.0
+    after_clifford_depolarization: 0.1
+    before_round_data_depolarization: 0.1
+    before_measure_flip_probability: 0.1
     after_reset_flip_probability: 0.0
   sampling:
-    seed: 5
+    seed: 42
     skip_ref_sample: False
-    shots: 3
+    reference_sample: "auto"  # NOT IMPLEMENTED YET
+    shots: 2
     console_log: True
   mapping:
     console_log: True
@@ -22,18 +23,25 @@ bitstream:
   format: "zxd"
   console_log: True
 exports:
-  figure:
-    exporting: True
-    trans_bg: False
-    type:
-    file: "output/CircuitFigure.svg"
-  circuit:
-    exporting: True
-    file: "output/CircuitText.txt"
   output:
     file: "output/output.json"
     prettify: True
-  pdf_report:
-  # More PDF related settings can be found in settings/pdf.ini
+  figure:
     exporting: True
-    file: "examples/example_report.pdf"
+    trans_bg: False  # Transparent background for SVG
+    type: "timeline-svg"  # Example type; must set a valid value
+    file: "output/CircuitFigure.svg"
+  surface_code_fig:
+    exporting: True
+    type: "timeslice-svg"  # Valid options: "timeslice-svg", "detslice-svg"
+    file: "output/SurfaceCode.svg"
+  circuit:
+    exporting: True
+    file: "output/CircuitText.txt"
+  pdf_report:
+    # More PDF-related settings can be found in settings/pdf.ini
+    exporting: True
+    file: "examples/report_d9.pdf"
+  database:
+    exporting: True
+    file: "db/simulations.db"
